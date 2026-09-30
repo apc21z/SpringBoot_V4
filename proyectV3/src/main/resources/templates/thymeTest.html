@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <title>Thymeleaf | ProyectV3</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="thyme-page">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="ProyectV3, inicio">
+        <span class="brand-mark" aria-hidden="true">P3</span>
+        <span>ProyectV3</span>
+      </a>
+      <nav aria-label="Navegación de ejemplos">
+        <a href="#condiciones">Condiciones</a>
+        <a href="#iteracion">Iteración</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Spring MVC · Thymeleaf</p>
+        <h1 id="page-title">Datos que <span>cobran vida.</span></h1>
+        <p class="intro">Una misma plantilla puede mostrar valores, decidir qué contenido aparece y repetir elementos de una lista.</p>
+      </section>
+
+      <section aria-labelledby="profile-title">
+        <div class="section-heading">
+          <h2 id="profile-title">Datos de la persona</h2>
+          <p>Valores recibidos desde el modelo</p>
+        </div>
+        <div class="profile-list">
+          <div class="profile-row">
+            <span class="profile-label">Nombre</span>
+            <span class="profile-value" th:text="${person.firstName}">Nombre</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Apellido</span>
+            <span class="profile-value" th:text="${person.lastName}">Apellido</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Profesión</span>
+            <span class="profile-value" th:text="${person.profession}">Profesión</span>
+          </div>
+          <div class="profile-row">
+            <span class="profile-label">Skills</span>
+            <div class="skill-list">
+              <span class="skill-item" th:each="skill : ${person.skills}" th:text="${skill.name}">Java</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="add-skill-title">
+        <div class="section-heading">
+          <h2 id="add-skill-title">Agregar una skill</h2>
+          <p>Se guardará en la sesión actual</p>
+        </div>
+        <form class="skill-form" th:action="@{/thymeTest/skills}" method="post">
+          <label for="skill">Nombre</label>
+          <input id="skill" name="skill" type="text" maxlength="60" placeholder="Por ejemplo, Kotlin" required>
+          <button type="submit">Agregar</button>
+        </form>
+      </section>
+
+      <section id="condiciones" aria-labelledby="conditions-title">
+        <div class="section-heading">
+          <h2 id="conditions-title">Mostrar según una condición</h2>
+          <p>Solo se renderiza el mensaje cuya condición se cumple</p>
+        </div>
+        <div class="example-list">
+          <article class="example-row">
+            <div class="example-name">
+              <code>th:if</code>
+              <span>La profesión coincide</span>
+            </div>
+            <p class="example-result" th:if="${person.profession == 'Software Engineer'}">
+              Condición verdadera: <strong th:text="${person.firstName}">John</strong> trabaja en software.
+            </p>
+          </article>
+          <article class="example-row">
+            <div class="example-name">
+              <code>th:unless</code>
+              <span>La condición anterior no se cumple</span>
+            </div>
+            <p class="example-result" th:unless="${person.profession == 'Software Engineer'}">
+              La profesión de <strong th:text="${person.firstName}">John</strong> es otra.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="iteracion" aria-labelledby="iteration-title">
+        <div class="section-heading">
+          <h2 id="iteration-title">Recorrer una lista</h2>
+          <p>Filtra personas por profesión</p>
+        </div>
+        <form class="filter-form" th:action="@{/thymeTest}" method="get">
+          <label for="profession-filter">Profesión</label>
+          <div class="filter-controls">
+            <input id="profession-filter" name="profession" type="search" maxlength="60"
+                   placeholder="Ejemplo: software" th:value="${professionFilter}">
+            <button type="submit">Buscar</button>
+            <a class="filter-reset" th:href="@{/thymeTest}">Limpiar</a>
+          </div>
+        </form>
+        <aside class="path-variable-example" th:if="${pathVariableValue != null}">
+          <span class="path-variable-label">@PathVariable</span>
+          <p>Valor recibido desde la URL: <strong th:text="${pathVariableValue}">Ana</strong></p>
+        </aside>
+        <p class="empty-state" th:if="${#lists.isEmpty(people)}">No hay personas con esa profesión.</p>
+        <div class="people-list" th:unless="${#lists.isEmpty(people)}">
+          <article class="person-row" th:each="personItem, status : ${people}">
+            <span class="person-number" th:text="${status.count}">1</span>
+            <div>
+              <h3 class="person-name">
+                <a th:href="@{/thymeTest/person/{firstName}(firstName=${personItem.firstName})}"
+                   th:text="${personItem.firstName + ' ' + personItem.lastName}">Nombre Apellido</a>
+              </h3>
+              <p class="person-profession" th:text="${personItem.profession}">Profesión</p>
+            </div>
+            <span class="person-tag" th:if="${personItem.profession == 'Software Engineer'}">Coincide con th:if</span>
+            <span class="person-tag other" th:unless="${personItem.profession == 'Software Engineer'}">Otra profesión</span>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a href="/">Volver al inicio</a>
+      <span>ProyectV3 · Java · Spring Boot · Thymeleaf</span>
+    </footer>
+  </div>
+</body>
+</html>

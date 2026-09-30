@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="robots" content="noindex">
+  <title>404 | ProyectV3</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --paper: #f4f3ed;
+      --ink: #20251f;
+      --muted: #686f65;
+      --line: #d9dcd1;
+      --green: #315c45;
+      --lime: #d2ec85;
+      --coral: #df765d;
+      --white: #fffefa;
+      font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      display: grid;
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background-color: var(--paper);
+      background-image: radial-gradient(#315c4510 0.7px, transparent 0.7px);
+      background-size: 8px 8px;
+    }
+
+    .shell {
+      display: flex;
+      width: min(100% - 48px, 1120px);
+      min-height: 100vh;
+      flex-direction: column;
+      margin-inline: auto;
+    }
+
+    header {
+      display: flex;
+      min-height: 76px;
+      align-items: center;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      color: inherit;
+      font-size: 15px;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 32px;
+      aspect-ratio: 1;
+      place-items: center;
+      border-radius: 10px 10px 10px 3px;
+      color: var(--white);
+      background: var(--green);
+      font-size: 14px;
+    }
+
+    main {
+      display: grid;
+      flex: 1;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 36px;
+      padding-block: 64px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 20px;
+      color: var(--green);
+      font-size: 11px;
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      width: 19px;
+      height: 2px;
+      background: var(--coral);
+      content: "";
+    }
+
+    h1 {
+      max-width: 600px;
+      margin: 0;
+      font-size: clamp(44px, 8vw, 76px);
+      font-weight: 650;
+      line-height: 1;
+    }
+
+    .message {
+      max-width: 410px;
+      margin: 20px 0 28px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    .home-link {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      gap: 18px;
+      padding-inline: 17px;
+      border-radius: 4px;
+      color: var(--white);
+      background: var(--green);
+      font-size: 13px;
+      font-weight: 650;
+      text-decoration: none;
+      transition: background 160ms ease, transform 160ms ease;
+    }
+
+    .home-link:hover {
+      transform: translateY(-2px);
+      background: #244a37;
+    }
+
+    .home-link span { color: var(--lime); font-size: 18px; }
+
+    .error-mark {
+      display: grid;
+      width: min(28vw, 300px);
+      min-width: 180px;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 1px solid #315c4533;
+      border-radius: 50%;
+      background: repeating-radial-gradient(circle, transparent 0 33px, #315c4512 34px 35px);
+      color: var(--green);
+      font-size: clamp(48px, 9vw, 88px);
+      font-weight: 650;
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-block: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    @media (max-width: 600px) {
+      .shell { width: calc(100% - 36px); }
+      header { min-height: 66px; }
+      main {
+        grid-template-columns: 1fr;
+        gap: 36px;
+        padding-block: 56px 42px;
+      }
+      .error-mark {
+        width: min(55vw, 220px);
+        min-width: 0;
+        justify-self: center;
+      }
+    }
+
+    @media (max-width: 390px) {
+      .shell { width: calc(100% - 28px); }
+      footer { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="/" aria-label="ProyectV3, volver al inicio">
+        <span class="brand-mark" aria-hidden="true">P3</span>
+        <span>ProyectV3</span>
+      </a>
+    </header>
+
+    <main>
+      <section aria-labelledby="page-title">
+        <p class="eyebrow">Error · 404</p>
+        <h1 id="page-title">Esta página no existe.</h1>
+        <p class="message">Puede que la dirección haya cambiado o que el enlace esté incompleto. Vuelve al inicio para continuar.</p>
+        <a class="home-link" href="/">Volver al inicio <span aria-hidden="true">&rarr;</span></a>
+      </section>
+      <div class="error-mark" aria-hidden="true">404</div>
+    </main>
+
+    <footer>
+      <span>ProyectV3</span>
+      <span>La dirección solicitada no está disponible</span>
+    </footer>
+  </div>
+</body>
+</html>

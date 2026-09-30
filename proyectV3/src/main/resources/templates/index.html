@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <meta name="description" content="Panel de inicio de ProyectV3, aplicación web con Java y Spring Boot.">
+  <title>ProyectV3 | Inicio</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="home-page">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="ProyectV3, inicio">
+        <span class="brand-mark" aria-hidden="true">P3</span>
+        <span>ProyectV3</span>
+      </a>
+      <nav aria-label="Navegación principal">
+        <a href="#inicio">Inicio</a>
+        <a href="#routes">Rutas</a>
+        <a href="#stack">Tecnología</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="inicio" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Aplicación web · Java 21</p>
+          <h1 id="page-title">Una base clara.<br><span>Lista para crecer.</span></h1>
+          <p class="intro">Este es el punto de partida de ProyectV3: una aplicación Spring Boot preparada para construir y evolucionar.</p>
+          <div class="database-status" role="status" aria-live="polite">
+            <span class="database-indicator" th:classappend="${databaseConnected} ? ' connected' : ' disconnected'"></span>
+            <span>Base de datos MySQL</span>
+            <strong th:text="${databaseConnected} ? 'Conectada' : 'Sin conexión'">Comprobando</strong>
+          </div>
+          <a class="primary-link" href="#routes">Ver rutas disponibles <span aria-hidden="true">&rarr;</span></a>
+        </div>
+        <div class="project-stamp" aria-hidden="true">
+          <div class="stamp-core">3</div>
+          <span class="stamp-label">PROYECTO · 2026</span>
+        </div>
+      </section>
+
+      <section id="routes" aria-labelledby="routes-title">
+        <div class="section-heading">
+          <h2 id="routes-title">Rutas disponibles</h2>
+          <p>Vistas web y endpoint de datos</p>
+        </div>
+        <div class="route-list">
+          <article class="route-item">
+            <span class="route-method">GET</span>
+            <a class="route-path" href="/">/</a>
+            <p class="route-description">Página de inicio de ProyectV3.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">GET</span>
+            <a class="route-path" href="/thymeTest">/thymeTest</a>
+            <p class="route-description">Ejemplos de th:text, th:if, th:unless y th:each.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">GET</span>
+            <a class="route-path" href="/people">/people</a>
+            <p class="route-description">Crear personas y buscarlas por skills.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">GET</span>
+            <a class="route-path" href="/api/people">/api/people</a>
+            <p class="route-description">Endpoint REST que devuelve personas en formato JSON.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="stack" aria-labelledby="stack-title">
+        <div class="section-heading">
+          <h2 id="stack-title">Base del proyecto</h2>
+          <p>Dependencias configuradas actualmente</p>
+        </div>
+        <div class="stack-grid">
+          <article class="stack-item">
+            <span class="stack-index">01 / LENGUAJE</span>
+            <h3>Java 21</h3>
+            <p>Versión objetivo</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">02 / FRAMEWORK</span>
+            <h3>Spring Boot</h3>
+            <p>Versión 4.1.1</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">03 / VISTAS</span>
+            <h3>Thymeleaf</h3>
+            <p>Motor de plantillas</p>
+          </article>
+          <article class="stack-item">
+            <span class="stack-index">04 / SERVIDOR</span>
+            <h3>Spring MVC</h3>
+            <p>Aplicación web</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>ProyectV3</span>
+      <span>Java · Spring Boot · Thymeleaf</span>
+    </footer>
+  </div>
+</body>
+</html>
