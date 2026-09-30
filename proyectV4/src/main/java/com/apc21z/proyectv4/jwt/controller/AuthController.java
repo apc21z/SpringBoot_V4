@@ -1,6 +1,7 @@
-package com.apc21z.proyectv4.rest;
+package com.apc21z.proyectv4.jwt.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.apc21z.proyectv4.dto.AuthResponse;
-import com.apc21z.proyectv4.dto.LoginRequest;
-import com.apc21z.proyectv4.dto.RegisterRequest;
-import com.apc21z.proyectv4.service.JwtService;
+import com.apc21z.proyectv4.jwt.dto.LoginRequest;
+import com.apc21z.proyectv4.jwt.dto.RegisterRequest;
+import com.apc21z.proyectv4.jwt.service.JwtService;
 import com.apc21z.proyectv4.service.UserAccountService;
 
 import jakarta.validation.Valid;
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -35,19 +36,20 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
         UserDetails user = userAccountService.register(request.email(), request.password());
-        return ResponseEntity.status(HttpStatus.CREATED).body(createResponse(user));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header(HttpHeaders.SET_COOKIE, jwtService.createTokenCookie(user.getUsername(), servletRequest.isSecure()).toString())
+                .build();
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<Void> login(@Valid @RequestBody LoginRequest request, HttpServletRequest servletRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password()));
-        return createResponse((UserDetails) authentication.getPrincipal());
-    }
-
-    private AuthResponse createResponse(UserDetails user) {
-        return new AuthResponse(jwtService.generateToken(user), "Bearer", jwtService.getExpirationSeconds());
+        UserDetails user = (UserDetails) authentication.getPrincipal();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, jwtService.createTokenCookie(user.getUsername(), servletRequest.isSecure()).toString())
+                .build();
     }
 }

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ProyectV4 | Dashboard</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <style>
+    body { margin: 0; background: #f4f3ed; color: #20251f; font-family: "Segoe UI", sans-serif; }
+    .wrap { width: min(980px, calc(100% - 28px)); margin: 60px auto; }
+    .card { background: #fffefa; border: 1px solid #d9dcd1; border-radius: 18px; padding: 28px; box-shadow: 0 12px 30px rgba(49,92,69,0.06); }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); }
+    .chip { display: inline-block; padding: 6px 10px; border-radius: 999px; background: #eaf7ee; color: #234d39; font-size: 0.8rem; font-weight: 700; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 26px 0; }
+    .panel { background: #f8f7f2; border: 1px solid #d9dcd1; border-radius: 14px; padding: 20px; }
+    .panel h3 { margin: 0 0 10px; }
+    .panel p { margin: 0; color: #686f65; line-height: 1.6; }
+    .actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 10px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+    .btn.primary { background: #315c45; color: #fff; }
+    .btn.secondary { background: #edf4ee; color: #234d39; }
+    .logout { color: #315c45; text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <span class="chip">Área protegida</span>
+      </div>
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+        <button type="submit" class="logout" style="background:none;border:0;padding:0;font:inherit;cursor:pointer;color:#315c45;font-weight:700;">Cerrar sesión</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h1>Bienvenido, <span th:text="${username}">usuario</span></h1>
+      <p>Esta página es accesible para usuarios autenticados y para administradores.</p>
+
+      <div class="grid">
+        <div class="panel">
+          <h3>Rol actual</h3>
+          <p th:if="${admin}">Administrador</p>
+          <p th:unless="${admin}">Usuario</p>
+        </div>
+        <div class="panel">
+          <h3>Acceso</h3>
+          <p>La zona de dashboard está disponible para login y admin.</p>
+        </div>
+        <div class="panel">
+          <h3>Admin</h3>
+          <p>Si tienes permisos de administrador, puedes entrar a la vista exclusiva.</p>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn primary" th:if="${admin}" th:href="@{/admin}">Ir a admin</a>
+        <a class="btn secondary" th:href="@{/}">Ir al inicio</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.apc21z.proyectv4.model.UserAccount;
+import com.apc21z.proyectv4.jwt.model.UserAccount;
 import com.apc21z.proyectv4.repository.UserAccountRepository;
 
 @Service

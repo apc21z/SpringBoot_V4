@@ -1,0 +1,189 @@
+{
+  "info": {
+    "_postman_id": "9fbc6f68-3aa4-4d51-9ef7-d84bfb10a3c8",
+    "name": "ProyectV4 API - JWT Cookie",
+    "description": "Colección para registro, login con JWT en cookie HttpOnly y endpoints protegidos. Ejecuta primero '01 - Obtener CSRF'. Postman guardará y enviará automáticamente las cookies para localhost.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "csrfToken", "value": "" },
+    { "key": "testEmail", "value": "" },
+    { "key": "adminEmail", "value": "admin@admin.com" },
+    { "key": "adminPassword", "value": "admin123" }
+  ],
+  "item": [
+    {
+      "name": "01 - Obtener CSRF",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/login",
+        "description": "Carga el formulario para recibir la cookie XSRF-TOKEN y extrae el campo oculto _csrf."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const match = pm.response.text().match(/name=\"_csrf\"\\s+value=\"([^\"]+)\"/);",
+              "pm.test('El formulario contiene token CSRF', function () { pm.expect(match).to.not.equal(null); });",
+              "if (match) pm.collectionVariables.set('csrfToken', match[1]);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Registrar usuario",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('testEmail', 'postman-' + Date.now() + '@example.com');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Usuario registrado', function () { pm.response.to.have.status(201); });",
+              "pm.test('JWT devuelto en cookie HttpOnly', function () { pm.expect(pm.response.headers.get('Set-Cookie') || '').to.include('HttpOnly'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"PostmanPass123\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/register"
+      }
+    },
+    {
+      "name": "03 - Login usuario",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login aceptado', function () { pm.response.to.have.status(200); });",
+              "pm.test('JWT cookie HttpOnly establecida', function () { pm.expect(pm.response.headers.get('Set-Cookie') || '').to.include('HttpOnly'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"PostmanPass123\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "04 - Listar personas (usuario autenticado)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Acceso autenticado', function () { pm.response.to.have.status(200); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/people"
+      }
+    },
+    {
+      "name": "05 - Login admin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Login admin aceptado', function () { pm.response.to.have.status(200); });",
+              "pm.test('JWT cookie HttpOnly establecida', function () { pm.expect(pm.response.headers.get('Set-Cookie') || '').to.include('HttpOnly'); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{adminEmail}}\",\n  \"password\": \"{{adminPassword}}\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "06 - Crear persona (solo admin)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Creación autorizada para admin', function () { pm.response.to.have.status(201); });"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Ada\",\n  \"lastName\": \"Lovelace\",\n  \"profession\": \"Matemática\",\n  \"skills\": [\n    { \"name\": \"Java\" }\n  ]\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "{{baseUrl}}/api/people"
+      }
+    },
+    {
+      "name": "07 - Cerrar sesión",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "X-XSRF-TOKEN", "value": "{{csrfToken}}" }
+        ],
+        "url": "{{baseUrl}}/logout",
+        "description": "Borra la cookie JWT y redirige al login."
+      }
+    }
+  ]
+}

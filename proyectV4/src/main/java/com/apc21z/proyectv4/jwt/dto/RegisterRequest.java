@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.dto;
+package com.apc21z.proyectv4.jwt.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

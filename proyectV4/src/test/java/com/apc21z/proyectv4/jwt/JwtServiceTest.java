@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.service;
+package com.apc21z.proyectv4.jwt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -8,13 +8,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.User;
 
+import com.apc21z.proyectv4.jwt.config.JwtProperties;
+import com.apc21z.proyectv4.jwt.service.JwtService;
+
 class JwtServiceTest {
 
     private static final String SECRET = "test-secret-for-jwt-unit-tests-0123456789";
 
+    private static JwtService jwtServiceFor(String secret) {
+        JwtProperties jwtProperties = new JwtProperties();
+        jwtProperties.setSecret(secret);
+        jwtProperties.setExpirationMs(900_000);
+        return new JwtService(jwtProperties);
+    }
+
     @Test
     void generatedTokenContainsUsernameAndValidatesForThatUser() {
-        JwtService jwtService = new JwtService(SECRET, 900_000);
+        JwtService jwtService = jwtServiceFor(SECRET);
         var user = User.withUsername("ana@example.com").password("encoded-password").roles("USER").build();
 
         String token = jwtService.generateToken(user);
@@ -27,6 +37,6 @@ class JwtServiceTest {
 
     @Test
     void rejectsShortSigningKey() {
-        assertThrows(IllegalArgumentException.class, () -> new JwtService("too-short", 900_000));
+        assertThrows(IllegalArgumentException.class, () -> jwtServiceFor("too-short"));
     }
 }

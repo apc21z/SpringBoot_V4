@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.model;
+package com.apc21z.proyectv4.jwt.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
