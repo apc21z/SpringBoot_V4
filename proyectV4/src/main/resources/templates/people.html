@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f3ed">
+  <title>Personas | ProyectV4</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body class="people-page">
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="ProyectV4, inicio">
+        <span class="brand-mark" aria-hidden="true">P3</span>
+        <span>ProyectV4</span>
+      </a>
+      <nav aria-label="Navegación principal">
+        <a href="/">Inicio</a>
+        <a href="/thymeTest">Thymeleaf</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <p class="eyebrow">Directorio · Personas</p>
+        <h1 id="page-title">Personas y <span>skills.</span></h1>
+        <p class="intro">Registra perfiles y encuentra personas por las habilidades que tienen.</p>
+      </section>
+
+      <section aria-labelledby="create-person-title">
+        <div class="section-heading">
+          <h2 id="create-person-title">Agregar persona</h2>
+          <p>Los datos se guardan en la base de datos</p>
+        </div>
+        <p class="form-status success" role="status" th:if="${status == 'created'}">Persona guardada correctamente.</p>
+        <p class="form-status error" role="alert" th:if="${status == 'invalid'}">Completa todos los campos e indica al menos una skill.</p>
+        <form class="people-form" action="/people" method="post">
+          <div class="form-field">
+            <label for="firstName">Nombre</label>
+            <input id="firstName" name="firstName" type="text" maxlength="80" autocomplete="given-name" required>
+          </div>
+          <div class="form-field">
+            <label for="lastName">Apellido</label>
+            <input id="lastName" name="lastName" type="text" maxlength="100" autocomplete="family-name" required>
+          </div>
+          <div class="form-field">
+            <label for="profession">Profesión</label>
+            <input id="profession" name="profession" type="text" maxlength="120" required>
+          </div>
+          <div class="form-field">
+            <label for="skills">Skills</label>
+            <input id="skills" name="skills" type="text" maxlength="300" placeholder="Java, Spring Boot" required>
+          </div>
+          <button type="submit">Guardar persona</button>
+        </form>
+      </section>
+
+      <section aria-labelledby="people-list-title">
+        <div class="section-heading">
+          <h2 id="people-list-title">Directorio</h2>
+          <p><span th:text="${#lists.size(people)}">0</span> resultados</p>
+        </div>
+        <form class="filter-form" action="/people" method="get">
+          <label for="skill-filter">Buscar por skill</label>
+          <div class="filter-controls">
+            <input id="skill-filter" name="skill" type="search" maxlength="60"
+                   placeholder="Ejemplo: Java" th:value="${skillFilter}">
+            <button type="submit">Buscar</button>
+            <a class="filter-reset" href="/people">Limpiar</a>
+          </div>
+        </form>
+        <p class="empty-state" th:if="${#lists.isEmpty(people)}">No hay personas que coincidan con esta búsqueda.</p>
+        <div class="people-list" th:unless="${#lists.isEmpty(people)}">
+          <article class="person-row" th:each="person : ${people}">
+            <div class="person-identity">
+              <h3 class="person-name" th:text="${person.firstName + ' ' + person.lastName}">Nombre Apellido</h3>
+              <p class="person-profession" th:text="${person.profession}">Profesión</p>
+            </div>
+            <div class="person-skills" aria-label="Skills">
+              <span class="skill-item" th:each="personSkill : ${person.skills}" th:text="${personSkill.name}">Java</span>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <a href="/">Volver al inicio</a>
+      <span>ProyectV4 · Java · Spring Boot</span>
+    </footer>
+  </div>
+</body>
+</html>
