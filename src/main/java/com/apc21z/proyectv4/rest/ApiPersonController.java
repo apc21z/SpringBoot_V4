@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.apc21z.proyectv4.model.Person;
+import com.apc21z.proyectv4.rest.dto.PersonDTO;
+import com.apc21z.proyectv4.rest.mapper.PersonMapper;
 import com.apc21z.proyectv4.service.PersonService;
 
 @RestController
@@ -21,32 +23,36 @@ import com.apc21z.proyectv4.service.PersonService;
 public class ApiPersonController {
 
     private final PersonService personService;
+    private final PersonMapper personMapper;
 
-    public ApiPersonController(PersonService personService) {
+    public ApiPersonController(PersonService personService, PersonMapper personMapper) {
         this.personService = personService;
+        this.personMapper = personMapper;
     }
 
     @GetMapping
-    public List<Person> getPeople() {
-        return personService.findAll();
+    public List<PersonDTO> getPeople() {
+        return personMapper.toDto(personService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Person> getPerson(@PathVariable Long id) {
+    public ResponseEntity<PersonDTO> getPerson(@PathVariable Long id) {
         return personService.findById(id)
+                .map(personMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<Person> createPerson(@RequestBody Person person) {
-        Person savedPerson = personService.save(person);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPerson);
+    public ResponseEntity<PersonDTO> createPerson(@RequestBody PersonDTO personDTO) {
+        Person savedPerson = personService.save(personMapper.toEntity(personDTO));
+        return ResponseEntity.status(HttpStatus.CREATED).body(personMapper.toDto(savedPerson));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person person) {
-        return personService.update(id, person)
+    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id, @RequestBody PersonDTO personDTO) {
+        return personService.update(id, personMapper.toEntity(personDTO))
+                .map(personMapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
