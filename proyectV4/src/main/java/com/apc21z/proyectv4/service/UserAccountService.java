@@ -3,7 +3,6 @@ package com.apc21z.proyectv4.service;
 import java.util.Locale;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.apc21z.proyectv4.jwt.config.AuthenticatedUserDetails;
 import com.apc21z.proyectv4.jwt.model.UserAccount;
 import com.apc21z.proyectv4.repository.UserAccountRepository;
 
@@ -32,8 +32,7 @@ public class UserAccountService implements UserDetailsService {
         }
 
         UserAccount account = new UserAccount(normalizedEmail, passwordEncoder.encode(rawPassword));
-        userAccountRepository.save(account);
-        return toUserDetails(account);
+        return toUserDetails(userAccountRepository.save(account));
     }
 
     @Override
@@ -44,10 +43,7 @@ public class UserAccountService implements UserDetailsService {
     }
 
     private UserDetails toUserDetails(UserAccount account) {
-        return User.withUsername(account.getEmail())
-                .password(account.getPassword())
-                .roles(account.getRole())
-                .build();
+        return new AuthenticatedUserDetails(account);
     }
 
     private String normalizeEmail(String email) {

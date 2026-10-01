@@ -6,8 +6,9 @@
   <title>ProyectV4 | Login</title>
   <link rel="stylesheet" href="/css/styles.css">
   <style>
-    body { display: grid; place-items: center; min-height: 100vh; background: linear-gradient(135deg, #f4f3ed 0%, #edf4ee 100%); }
-    .auth-shell { width: min(440px, calc(100% - 28px)); }
+    body { min-height: 100vh; background: linear-gradient(135deg, #f4f3ed 0%, #edf4ee 100%); }
+    .auth-page .site-navbar { width: min(1120px, calc(100% - 48px)); margin-inline: auto; }
+    .auth-shell { width: min(440px, calc(100% - 28px)); margin: clamp(48px, 9vh, 88px) auto 48px; }
     .auth-card { background: #fffefa; border: 1px solid #d9dcd1; border-radius: 18px; box-shadow: 0 18px 40px rgba(49,92,69,0.08); padding: 32px; }
     .auth-card h1 { font-size: 2rem; margin: 0 0 8px; }
     .auth-card p { color: #686f65; margin: 0 0 20px; }
@@ -22,7 +23,9 @@
     .link-row a { color: #315c45; font-weight: 700; text-decoration: none; }
   </style>
 </head>
-<body>
+<body class="auth-page">
+  <header th:replace="~{fragments/navbar :: navbar('login')}"></header>
+  <script th:src="@{/js/navbar.js}" defer></script>
   <div class="auth-shell">
     <div class="auth-card">
       <h1>Iniciar sesión</h1>

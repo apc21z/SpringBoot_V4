@@ -13,12 +13,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
 import com.apc21z.proyectv4.jwt.service.JwtService;
-import com.apc21z.proyectv4.service.UserAccountService;
 
 @Configuration
 public class SecurityConfig {
@@ -29,9 +29,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    AuthenticationProvider authenticationProvider(UserAccountService userAccountService,
+        AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService,
             PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userAccountService);
+                DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }
@@ -43,7 +43,7 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    SecurityFilterChain apiSecurity(HttpSecurity http, JwtService jwtService, UserAccountService userAccountService,
+        SecurityFilterChain apiSecurity(HttpSecurity http, JwtService jwtService, UserDetailsService userDetailsService,
             AuthenticationProvider authenticationProvider) throws Exception {
         http.securityMatcher("/api/**")
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
@@ -57,14 +57,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(
                         (request, response, authException) -> response.sendError(401, "Unauthorized")))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userAccountService),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
     @Order(2)
-    SecurityFilterChain webSecurity(HttpSecurity http, JwtService jwtService, UserAccountService userAccountService,
+        SecurityFilterChain webSecurity(HttpSecurity http, JwtService jwtService, UserDetailsService userDetailsService,
             AuthenticationProvider authenticationProvider) throws Exception {
         http.csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -89,7 +89,7 @@ public class SecurityConfig {
                             response.sendRedirect("/");
                         })
                         .permitAll())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userAccountService),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService, userDetailsService),
                         UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

@@ -1,6 +1,7 @@
 package com.apc21z.proyectv4.rest;
 
 import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,12 +17,12 @@ import com.apc21z.proyectv4.model.Person;
 import com.apc21z.proyectv4.service.PersonService;
 
 @RestController
-@RequestMapping({ "/api/people", "/api/person" })
-public class ApiHomeController {
+@RequestMapping("/api/person")
+public class ApiPersonController {
 
     private final PersonService personService;
 
-    public ApiHomeController(PersonService personService) {
+    public ApiPersonController(PersonService personService) {
         this.personService = personService;
     }
 
@@ -46,8 +47,8 @@ public class ApiHomeController {
     @PutMapping("/{id}")
     public ResponseEntity<Person> updatePerson(@PathVariable Long id, @RequestBody Person person) {
         return personService.update(id, person)
-            .map(ResponseEntity::ok)
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")

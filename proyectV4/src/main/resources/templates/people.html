@@ -34,22 +34,26 @@
         </div>
         <p class="form-status success" role="status" th:if="${status == 'created'}">Persona guardada correctamente.</p>
         <p class="form-status error" role="alert" th:if="${status == 'invalid'}">Completa todos los campos e indica al menos una skill.</p>
-        <form class="people-form" action="/people" method="post">
+        <form class="people-form" action="/people" method="post" th:object="${personForm}">
           <div class="form-field">
             <label for="firstName">Nombre</label>
-            <input id="firstName" name="firstName" type="text" maxlength="80" autocomplete="given-name" required>
+            <input id="firstName" th:field="*{firstName}" type="text" maxlength="80" autocomplete="given-name" required>
+            <p class="form-status error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p>
           </div>
           <div class="form-field">
             <label for="lastName">Apellido</label>
-            <input id="lastName" name="lastName" type="text" maxlength="100" autocomplete="family-name" required>
+            <input id="lastName" th:field="*{lastName}" type="text" maxlength="100" autocomplete="family-name" required>
+            <p class="form-status error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p>
           </div>
           <div class="form-field">
             <label for="profession">Profesión</label>
-            <input id="profession" name="profession" type="text" maxlength="120" required>
+            <input id="profession" th:field="*{profession}" type="text" maxlength="120" required>
+            <p class="form-status error" th:if="${#fields.hasErrors('profession')}" th:errors="*{profession}"></p>
           </div>
           <div class="form-field">
             <label for="skills">Skills</label>
-            <input id="skills" name="skills" type="text" maxlength="300" placeholder="Java, Spring Boot" required>
+            <input id="skills" th:field="*{skills}" type="text" maxlength="300" placeholder="Java, Spring Boot" required>
+            <p class="form-status error" th:if="${#fields.hasErrors('skills')}" th:errors="*{skills}"></p>
           </div>
           <button type="submit">Guardar persona</button>
         </form>

@@ -13,12 +13,12 @@ import com.apc21z.proyectv4.service.PersonService;
 import com.apc21z.proyectv4.service.UserAccountService;
 
 @Controller
-public class HomeController {
+public class IndexController {
 
     private final PersonService personService;
     private final UserAccountService userAccountService;
 
-    public HomeController(PersonService personService, UserAccountService userAccountService) {
+    public IndexController(PersonService personService, UserAccountService userAccountService) {
         this.personService = personService;
         this.userAccountService = userAccountService;
     }
@@ -27,11 +27,6 @@ public class HomeController {
     public String getIndex(Model model) {
         model.addAttribute("databaseConnected", personService.isDatabaseConnected());
         return "index";
-    }
-
-    @GetMapping("/login")
-    public String loginPage() {
-        return "login";
     }
 
     @GetMapping("/register")
