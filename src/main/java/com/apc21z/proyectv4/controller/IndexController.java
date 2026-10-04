@@ -7,10 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.web.server.ResponseStatusException;
 
-import com.apc21z.proyectv4.service.PersonService;
-import com.apc21z.proyectv4.service.UserAccountService;
+import com.apc21z.proyectv4.rest.service.PersonService;
+import com.apc21z.proyectv4.rest.service.UserAccountService;
+
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class IndexController {

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probador API de libros</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --card: #ffffff;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --text: #111827;
+            --muted: #6b7280;
+            --border: #dfe6ee;
+            --danger: #b91c1c;
+            --success: #166534;
+            --warning: #92400e;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+        .wrap {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+        }
+        h1, h2 { margin-top: 0; }
+        form { display: grid; gap: 12px; }
+        label {
+            display: grid;
+            gap: 6px;
+            font-weight: 600;
+        }
+        input, textarea, button {
+            font: inherit;
+        }
+        input, textarea {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: var(--primary-dark); }
+        .danger { background: var(--danger); }
+        .danger:hover { background: #991b1b; }
+        .secondary {
+            background: #eef2ff;
+            color: var(--primary);
+        }
+        .secondary:hover { background: #e0e7ff; }
+        .output {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            white-space: pre-wrap;
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .status {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .status.ok { color: var(--success); }
+        .status.error { color: var(--danger); }
+        .status.warn { color: var(--warning); }
+        small { color: var(--muted); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Probador de API de libros</h1>
+        <div class="grid">
+            <section class="card">
+                <h2>Autenticación</h2>
+                <form id="loginForm">
+                    <label>
+                        Usuario
+                        <input id="username" type="text" value="admin" placeholder="admin">
+                    </label>
+                    <label>
+                        Contraseña
+                        <input id="password" type="password" value="admin123" placeholder="********">
+                    </label>
+                    <button type="submit">Iniciar sesión</button>
+                </form>
+
+                <label>
+                    Token JWT
+                    <input id="tokenInput" type="text" placeholder="Pega el token recibido del login">
+                </label>
+                <button class="secondary" id="saveTokenBtn" type="button">Guardar token en el navegador</button>
+            </section>
+
+            <section class="card">
+                <h2>Operaciones</h2>
+                <form id="crudForm">
+                    <label>
+                        ID
+                        <input id="bookId" type="number" min="1" placeholder="1">
+                    </label>
+                    <label>
+                        Título
+                        <input id="title" type="text" value="Clean Code">
+                    </label>
+                    <label>
+                        Autor
+                        <input id="author" type="text" value="Robert C. Martin">
+                    </label>
+                    <label>
+                        ISBN
+                        <input id="isbn" type="text" value="9780132350884">
+                    </label>
+
+                    <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                        <button type="button" id="listBtn">Listar</button>
+                        <button type="button" id="getBtn">Obtener por ID</button>
+                        <button type="button" id="createBtn">Crear</button>
+                        <button type="button" id="updateBtn">Actualizar</button>
+                        <button type="button" class="danger" id="deleteBtn">Eliminar</button>
+                    </div>
+                </form>
+            </section>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <div id="status" class="status warn">Sin ejecución todavía.</div>
+            <pre id="responseOutput" class="output">{}</pre>
+        </div>
+    </div>
+
+    <script>
+        const tokenInput = document.getElementById('tokenInput');
+        const output = document.getElementById('responseOutput');
+        const statusEl = document.getElementById('status');
+
+        const savedToken = localStorage.getItem('bookToken');
+        if (savedToken) {
+            tokenInput.value = savedToken;
+        }
+
+        function setStatus(type, text) {
+            statusEl.className = `status ${type}`;
+            statusEl.textContent = text;
+        }
+
+        function renderResult(data) {
+            output.textContent = JSON.stringify(data, null, 2);
+        }
+
+        function getAuthHeaders() {
+            const token = tokenInput.value.trim();
+            return {
+                'Content-Type': 'application/json',
+                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            };
+        }
+
+        async function apiRequest(url, method = 'GET', body = null) {
+            const options = {
+                method,
+                headers: getAuthHeaders()
+            };
+
+            if (body !== null) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(url, options);
+            const text = await response.text();
+            let data = null;
+            try {
+                data = text ? JSON.parse(text) : null;
+            } catch (error) {
+                data = text;
+            }
+
+            if (!response.ok) {
+                throw new Error(JSON.stringify({ status: response.status, body: data }, null, 2));
+            }
+            return data;
+        }
+
+        document.getElementById('saveTokenBtn').addEventListener('click', () => {
+            const token = tokenInput.value.trim();
+            if (!token) {
+                setStatus('error', 'Debes introducir un token antes de guardarlo.');
+                return;
+            }
+            localStorage.setItem('bookToken', token);
+            setStatus('ok', 'Token guardado en el navegador.');
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+                const username = document.getElementById('username').value.trim();
+                const password = document.getElementById('password').value.trim();
+
+                const data = await apiRequest('/api/auth/login', 'POST', { username, password });
+                if (data.accessToken) {
+                    tokenInput.value = data.accessToken;
+                    localStorage.setItem('bookToken', data.accessToken);
+                    setStatus('ok', 'Login correcto. Token guardado.');
+                    renderResult(data);
+                    return;
+                }
+
+                setStatus('warn', 'La respuesta no devolvió un accessToken.');
+                renderResult(data);
+            } catch (error) {
+                setStatus('error', 'Fallo al hacer login.');
+                renderResult(error.message);
+            }
+        });
+
+        document.getElementById('listBtn').addEventListener('click', async () => {
+            try {
+                const data = await apiRequest('/api/books');
+                setStatus('ok', 'Listado de libros obtenido con éxito.');
+                renderResult(data);
+            } catch (error) {
+                setStatus('error', 'No se pudo obtener la lista.');
+                renderResult(error.message);
+            }
+        });
+
+        document.getElementById('getBtn').addEventListener('click', async () => {
+            const id = document.getElementById('bookId').value;
+            if (!id) {
+                setStatus('warn', 'Introduce un ID para obtener un libro.');
+                return;
+            }
+            try {
+                const data = await apiRequest(`/api/books/${id}`);
+                setStatus('ok', `Libro ${id} obtenido correctamente.`);
+                renderResult(data);
+            } catch (error) {
+                setStatus('error', `No se pudo obtener el libro ${id}.`);
+                renderResult(error.message);
+            }
+        });
+
+        document.getElementById('createBtn').addEventListener('click', async () => {
+            try {
+                const payload = {
+                    title: document.getElementById('title').value,
+                    author: document.getElementById('author').value,
+                    isbn: document.getElementById('isbn').value
+                };
+                const data = await apiRequest('/api/books', 'POST', payload);
+                setStatus('ok', 'Libro creado correctamente.');
+                document.getElementById('bookId').value = data.id;
+                renderResult(data);
+            } catch (error) {
+                setStatus('error', 'No se pudo crear el libro.');
+                renderResult(error.message);
+            }
+        });
+
+        document.getElementById('updateBtn').addEventListener('click', async () => {
+            const id = document.getElementById('bookId').value;
+            if (!id) {
+                setStatus('warn', 'Introduce un ID para actualizar.');
+                return;
+            }
+            try {
+                const payload = {
+                    title: document.getElementById('title').value,
+                    author: document.getElementById('author').value,
+                    isbn: document.getElementById('isbn').value
+                };
+                const data = await apiRequest(`/api/books/${id}`, 'PUT', payload);
+                setStatus('ok', `Libro ${id} actualizado correctamente.`);
+                renderResult(data);
+            } catch (error) {
+                setStatus('error', `No se pudo actualizar el libro ${id}.`);
+                renderResult(error.message);
+            }
+        });
+
+        document.getElementById('deleteBtn').addEventListener('click', async () => {
+            const id = document.getElementById('bookId').value;
+            if (!id) {
+                setStatus('warn', 'Introduce un ID para borrar.');
+                return;
+            }
+            try {
+                await apiRequest(`/api/books/${id}`, 'DELETE');
+                setStatus('ok', `Libro ${id} eliminado correctamente.`);
+                renderResult({ deletedId: id, status: 'success' });
+            } catch (error) {
+                setStatus('error', `No se pudo eliminar el libro ${id}.`);
+                renderResult(error.message);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.apc21z.proyectv4.model.Person;
-import com.apc21z.proyectv4.rest.dto.PersonDTO;
-import com.apc21z.proyectv4.rest.mapper.PersonMapper;
-import com.apc21z.proyectv4.service.PersonService;
+import com.apc21z.proyectv4.rest.model.Person;
+import com.apc21z.proyectv4.rest.model.dto.PersonDTO;
+import com.apc21z.proyectv4.rest.model.mapper.PersonMapper;
+import com.apc21z.proyectv4.rest.service.PersonService;
 
 @RestController
 @RequestMapping("/api/people")

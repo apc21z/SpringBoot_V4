@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
-import com.apc21z.proyectv4.model.Person;
-import com.apc21z.proyectv4.model.Skill;
-import com.apc21z.proyectv4.service.PersonService;
+import com.apc21z.proyectv4.rest.model.Person;
+import com.apc21z.proyectv4.rest.model.Skill;
+import com.apc21z.proyectv4.rest.service.PersonService;
 
 @Controller
 @RequestMapping("/thymeTest")
