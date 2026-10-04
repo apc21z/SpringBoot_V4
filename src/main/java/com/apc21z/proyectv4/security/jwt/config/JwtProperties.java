@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.config;
+package com.apc21z.proyectv4.security.jwt.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

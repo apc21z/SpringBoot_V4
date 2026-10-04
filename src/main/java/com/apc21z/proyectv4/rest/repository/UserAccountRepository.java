@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.apc21z.proyectv4.rest.jwt.model.UserAccount;
+import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 public interface UserAccountRepository extends JpaRepository<UserAccount, Long> {
 

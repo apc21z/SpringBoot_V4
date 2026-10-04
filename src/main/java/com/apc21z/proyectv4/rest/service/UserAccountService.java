@@ -11,9 +11,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.apc21z.proyectv4.rest.jwt.config.AuthenticatedUserDetails;
-import com.apc21z.proyectv4.rest.jwt.model.UserAccount;
 import com.apc21z.proyectv4.rest.repository.UserAccountRepository;
+import com.apc21z.proyectv4.security.jwt.config.AuthenticatedUserDetails;
+import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 @Service
 public class UserAccountService implements UserDetailsService {

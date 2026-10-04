@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.controller;
+package com.apc21z.proyectv4.security.jwt.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpHeaders;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.apc21z.proyectv4.rest.jwt.dto.LoginRequest;
-import com.apc21z.proyectv4.rest.jwt.dto.RegisterRequest;
-import com.apc21z.proyectv4.rest.jwt.service.JwtService;
 import com.apc21z.proyectv4.rest.service.UserAccountService;
+import com.apc21z.proyectv4.security.jwt.dto.LoginRequest;
+import com.apc21z.proyectv4.security.jwt.dto.RegisterRequest;
+import com.apc21z.proyectv4.security.jwt.service.JwtService;
 
 import jakarta.validation.Valid;
 import jakarta.servlet.http.HttpServletRequest;

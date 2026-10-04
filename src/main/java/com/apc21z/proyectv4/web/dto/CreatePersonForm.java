@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.controller.dto;
+package com.apc21z.proyectv4.web.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

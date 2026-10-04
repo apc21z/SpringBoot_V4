@@ -1,11 +1,11 @@
-package com.apc21z.proyectv4.controller;
+package com.apc21z.proyectv4.web;
 
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
-@ControllerAdvice(basePackages = "com.apc21z.proyectv4.controller")
+@ControllerAdvice(basePackages = "com.apc21z.proyectv4.web")
 public class WebAuthenticationAdvice {
 
     @ModelAttribute("currentUser")

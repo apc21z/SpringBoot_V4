@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.config;
+package com.apc21z.proyectv4.security.jwt.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,7 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
-import com.apc21z.proyectv4.rest.jwt.service.JwtService;
+import com.apc21z.proyectv4.security.jwt.service.JwtService;
 
 @Configuration
 public class SecurityConfig {

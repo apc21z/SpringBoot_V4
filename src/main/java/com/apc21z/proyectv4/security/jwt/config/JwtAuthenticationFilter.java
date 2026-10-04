@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.config;
+package com.apc21z.proyectv4.security.jwt.config;
 
 import java.io.IOException;
 
@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.apc21z.proyectv4.rest.jwt.service.JwtService;
+import com.apc21z.proyectv4.security.jwt.service.JwtService;
 
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;

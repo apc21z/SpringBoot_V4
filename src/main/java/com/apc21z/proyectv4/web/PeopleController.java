@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.controller;
+package com.apc21z.proyectv4.web;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.apc21z.proyectv4.controller.dto.CreatePersonForm;
 import com.apc21z.proyectv4.rest.model.Person;
+import com.apc21z.proyectv4.web.dto.CreatePersonForm;
 import com.apc21z.proyectv4.rest.model.Skill;
 import com.apc21z.proyectv4.rest.service.PersonService;
 

@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.controller;
+package com.apc21z.proyectv4.web;
 
 import java.util.ArrayList;
 import java.util.List;

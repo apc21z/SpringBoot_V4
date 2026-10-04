@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.config;
+package com.apc21z.proyectv4.security.jwt.config;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.apc21z.proyectv4.rest.jwt.model.UserAccount;
+import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 public final class AuthenticatedUserDetails implements UserDetails {
 

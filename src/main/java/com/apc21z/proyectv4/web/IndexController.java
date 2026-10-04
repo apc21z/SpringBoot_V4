@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.controller;
+package com.apc21z.proyectv4.web;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;

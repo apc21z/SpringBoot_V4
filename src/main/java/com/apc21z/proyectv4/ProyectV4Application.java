@@ -7,9 +7,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import com.apc21z.proyectv4.rest.jwt.config.JwtProperties;
-import com.apc21z.proyectv4.rest.jwt.model.UserAccount;
 import com.apc21z.proyectv4.rest.repository.UserAccountRepository;
+import com.apc21z.proyectv4.security.jwt.config.JwtProperties;
+import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 @SpringBootApplication
 @EnableConfigurationProperties(JwtProperties.class)

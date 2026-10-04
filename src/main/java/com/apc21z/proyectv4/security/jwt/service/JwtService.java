@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.jwt.service;
+package com.apc21z.proyectv4.security.jwt.service;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import com.apc21z.proyectv4.rest.jwt.config.JwtProperties;
+import com.apc21z.proyectv4.security.jwt.config.JwtProperties;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
