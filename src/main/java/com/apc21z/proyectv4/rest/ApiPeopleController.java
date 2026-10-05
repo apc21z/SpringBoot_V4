@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import com.apc21z.proyectv4.rest.model.Person;
 import com.apc21z.proyectv4.rest.model.dto.PersonDTO;
 import com.apc21z.proyectv4.rest.model.mapper.PersonMapper;
@@ -44,13 +45,14 @@ public class ApiPeopleController {
     }
 
     @PostMapping
-    public ResponseEntity<PersonDTO> createPerson(@RequestBody PersonDTO personDTO) {
+    public ResponseEntity<PersonDTO> createPerson(@Valid @RequestBody PersonDTO personDTO) {
         Person savedPerson = personService.save(personMapper.toEntity(personDTO));
         return ResponseEntity.status(HttpStatus.CREATED).body(personMapper.toDto(savedPerson));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id, @RequestBody PersonDTO personDTO) {
+        public ResponseEntity<PersonDTO> updatePerson(@PathVariable Long id,
+            @Valid @RequestBody PersonDTO personDTO) {
         return personService.update(id, personMapper.toEntity(personDTO))
                 .map(personMapper::toDto)
                 .map(ResponseEntity::ok)
