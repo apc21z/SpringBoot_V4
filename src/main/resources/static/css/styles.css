@@ -1,13 +1,15 @@
 :root {
   color-scheme: light;
-  --paper: #f4f3ed;
-  --ink: #20251f;
-  --muted: #686f65;
-  --line: #d9dcd1;
-  --green: #315c45;
-  --lime: #d2ec85;
-  --coral: #df765d;
-  --white: #fffefa;
+  --paper: #fff8fc;
+  --ink: #30263a;
+  --muted: #766a7a;
+  --line: #eadce9;
+  --green: #237f82;
+  --lime: #f5df75;
+  --coral: #e96991;
+  --white: #fffdfd;
+  --violet: #7864b5;
+  --sky: #83cde0;
   font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -22,7 +24,9 @@ body {
   margin: 0;
   color: var(--ink);
   background-color: var(--paper);
-  background-image: radial-gradient(#315c4510 0.7px, transparent 0.7px);
+  background-image: radial-gradient(#e9699112 0.8px, transparent 0.8px),
+    radial-gradient(#83cde012 0.8px, transparent 0.8px);
+  background-position: 0 0, 4px 4px;
   background-size: 8px 8px;
 }
 
@@ -57,7 +61,7 @@ a { color: inherit; }
   place-items: center;
   border-radius: 10px 10px 10px 3px;
   color: var(--white);
-  background: var(--green);
+  background: linear-gradient(145deg, var(--coral), var(--violet) 55%, var(--green));
   font-size: 14px;
 }
 
@@ -116,6 +120,24 @@ a { color: inherit; }
   outline: 3px solid var(--coral);
   outline-offset: 3px;
 }
+
+.site-navbar svg, .primary-link svg, .icon-action svg,
+.skill-form button svg, .filter-controls button svg, .people-form button svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.site-nav-links a { display: inline-flex; align-items: center; gap: 7px; }
+.site-nav-links a svg { width: 15px; height: 15px; color: var(--coral); }
+.topbar nav a { display: inline-flex; align-items: center; gap: 7px; }
+.topbar nav svg { width: 15px; height: 15px; color: var(--coral); stroke: currentColor; stroke-width: 1.8; fill: none; }
+.skill-form button, .filter-controls button, .people-form button { display: inline-flex; align-items: center; gap: 8px; }
 
 main { padding-bottom: 58px; }
 .home-page main { padding-bottom: 72px; }
@@ -230,6 +252,14 @@ h1 span { color: var(--green); }
   text-decoration: none;
   transition: background 160ms ease, transform 160ms ease;
 }
+
+.primary-link.secondary-action {
+  border: 1px solid #e2d8ed;
+  color: var(--violet);
+  background: #f3effa;
+}
+
+.primary-link.secondary-action:hover { background: #e9e0f4; }
 
 .primary-link:hover {
   transform: translateY(-2px);

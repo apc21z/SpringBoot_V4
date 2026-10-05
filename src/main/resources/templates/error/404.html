@@ -3,20 +3,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f4f3ed">
+  <meta name="theme-color" content="#fff8fc">
   <meta name="robots" content="noindex">
   <title>404 | ProyectV4</title>
   <style>
     :root {
       color-scheme: light;
-      --paper: #f4f3ed;
-      --ink: #20251f;
-      --muted: #686f65;
-      --line: #d9dcd1;
-      --green: #315c45;
-      --lime: #d2ec85;
-      --coral: #df765d;
-      --white: #fffefa;
+      --paper: #fff8fc;
+      --ink: #30263a;
+      --muted: #766a7a;
+      --line: #eadce9;
+      --green: #237f82;
+      --lime: #f5df75;
+      --coral: #e96991;
+      --white: #fffdfd;
+      --violet: #7864b5;
       font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
       font-synthesis: none;
       text-rendering: optimizeLegibility;
@@ -31,7 +32,7 @@
       margin: 0;
       color: var(--ink);
       background-color: var(--paper);
-      background-image: radial-gradient(#315c4510 0.7px, transparent 0.7px);
+      background-image: radial-gradient(#e9699112 0.8px, transparent 0.8px), radial-gradient(#83cde012 0.8px, transparent 0.8px);
       background-size: 8px 8px;
     }
 
@@ -67,7 +68,7 @@
       place-items: center;
       border-radius: 10px 10px 10px 3px;
       color: var(--white);
-      background: var(--green);
+      background: linear-gradient(145deg, var(--coral), var(--violet) 55%, var(--green));
       font-size: 14px;
     }
 
@@ -131,10 +132,10 @@
 
     .home-link:hover {
       transform: translateY(-2px);
-      background: #244a37;
+      background: linear-gradient(145deg, var(--coral), var(--violet) 55%, var(--green));
     }
 
-    .home-link span { color: var(--lime); font-size: 18px; }
+    .home-link svg { width: 17px; height: 17px; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
 
     .error-mark {
       display: grid;
@@ -142,9 +143,9 @@
       min-width: 180px;
       aspect-ratio: 1;
       place-items: center;
-      border: 1px solid #315c4533;
+      border: 1px solid #7864b533;
       border-radius: 50%;
-      background: repeating-radial-gradient(circle, transparent 0 33px, #315c4512 34px 35px);
+      background: repeating-radial-gradient(circle, transparent 0 33px, #e9699118 34px 35px);
       color: var(--green);
       font-size: clamp(48px, 9vw, 88px);
       font-weight: 650;
@@ -199,7 +200,7 @@
         <p class="eyebrow">Error · 404</p>
         <h1 id="page-title">Esta página no existe.</h1>
         <p class="message">Puede que la dirección haya cambiado o que el enlace esté incompleto. Vuelve al inicio para continuar.</p>
-        <a class="home-link" href="/">Volver al inicio <span aria-hidden="true">&rarr;</span></a>
+        <a class="home-link" href="/"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg>Volver al inicio</a>
       </section>
       <div class="error-mark" aria-hidden="true">404</div>
     </main>
