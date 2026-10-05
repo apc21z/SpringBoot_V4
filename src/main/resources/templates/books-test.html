@@ -91,6 +91,14 @@
         .status.error { color: var(--danger); }
         .status.warn { color: var(--warning); }
         small { color: var(--muted); }
+        .pages-editor { display: grid; gap: 12px; }
+        .pages-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .pages-heading h3 { margin: 0; font-size: 16px; }
+        .page-list { display: grid; gap: 12px; }
+        .page-entry { display: grid; min-width: 0; gap: 12px; margin: 0; padding: 14px; border: 1px solid var(--border); border-radius: 8px; }
+        .page-entry legend { padding-inline: 5px; font-weight: 600; }
+        .page-entry textarea { min-height: 120px; resize: vertical; }
+        .pages-heading button, .page-entry button { width: fit-content; }
     </style>
 </head>
 <body>
@@ -101,8 +109,8 @@
                 <h2>Autenticación</h2>
                 <form id="loginForm">
                     <label>
-                        Usuario
-                        <input id="username" type="text" value="admin" placeholder="admin">
+                        Correo
+                        <input id="username" type="email" value="admin@admin.com" placeholder="admin@example.com">
                     </label>
                     <label>
                         Contraseña
@@ -111,11 +119,6 @@
                     <button type="submit">Iniciar sesión</button>
                 </form>
 
-                <label>
-                    Token JWT
-                    <input id="tokenInput" type="text" placeholder="Pega el token recibido del login">
-                </label>
-                <button class="secondary" id="saveTokenBtn" type="button">Guardar token en el navegador</button>
             </section>
 
             <section class="card">
@@ -127,16 +130,23 @@
                     </label>
                     <label>
                         Título
-                        <input id="title" type="text" value="Clean Code">
+                        <input id="title" type="text" value="Clean Code" maxlength="255" required>
                     </label>
                     <label>
                         Autor
-                        <input id="author" type="text" value="Robert C. Martin">
+                        <input id="author" type="text" value="Robert C. Martin" maxlength="255" required>
                     </label>
                     <label>
                         ISBN
-                        <input id="isbn" type="text" value="9780132350884">
+                        <input id="isbn" type="text" value="9780132350884" maxlength="255" required>
                     </label>
+                    <section class="pages-editor" aria-labelledby="pagesTitle">
+                        <div class="pages-heading">
+                            <h3 id="pagesTitle">Páginas del libro</h3>
+                            <button class="secondary" type="button" id="addPageBtn">Agregar página</button>
+                        </div>
+                        <div class="page-list" id="pagesList"></div>
+                    </section>
 
                     <div style="display:flex; gap:10px; flex-wrap: wrap;">
                         <button type="button" id="listBtn">Listar</button>
@@ -156,14 +166,9 @@
     </div>
 
     <script>
-        const tokenInput = document.getElementById('tokenInput');
         const output = document.getElementById('responseOutput');
         const statusEl = document.getElementById('status');
-
-        const savedToken = localStorage.getItem('bookToken');
-        if (savedToken) {
-            tokenInput.value = savedToken;
-        }
+        const pagesList = document.getElementById('pagesList');
 
         function setStatus(type, text) {
             statusEl.className = `status ${type}`;
@@ -174,18 +179,85 @@
             output.textContent = JSON.stringify(data, null, 2);
         }
 
-        function getAuthHeaders() {
-            const token = tokenInput.value.trim();
+        function validateBookForm() {
+            return document.getElementById('crudForm').reportValidity();
+        }
+
+        function addPage(page = {}) {
+            const pageEntry = document.createElement('fieldset');
+            pageEntry.className = 'page-entry';
+
+            const legend = document.createElement('legend');
+            legend.textContent = 'Página';
+
+            const titleLabel = document.createElement('label');
+            titleLabel.textContent = 'Título';
+            const titleInput = document.createElement('input');
+            titleInput.className = 'page-title';
+            titleInput.type = 'text';
+            titleInput.maxLength = 255;
+            titleInput.required = true;
+            titleInput.value = page.title ?? '';
+            titleLabel.append(titleInput);
+
+            const textLabel = document.createElement('label');
+            textLabel.textContent = 'Texto';
+            const textArea = document.createElement('textarea');
+            textArea.className = 'page-text';
+            textArea.required = true;
+            textArea.value = page.text ?? '';
+            textLabel.append(textArea);
+
+            const removeButton = document.createElement('button');
+            removeButton.className = 'danger';
+            removeButton.type = 'button';
+            removeButton.textContent = 'Quitar página';
+            removeButton.addEventListener('click', () => pageEntry.remove());
+
+            pageEntry.append(legend, titleLabel, textLabel, removeButton);
+            pagesList.append(pageEntry);
+        }
+
+        function setPages(pages) {
+            pagesList.replaceChildren();
+            pages.forEach(addPage);
+        }
+
+        function getBookPayload() {
             return {
-                'Content-Type': 'application/json',
-                ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                title: document.getElementById('title').value,
+                author: document.getElementById('author').value,
+                isbn: document.getElementById('isbn').value,
+                pages: [...pagesList.querySelectorAll('.page-entry')].map(pageEntry => ({
+                    title: pageEntry.querySelector('.page-title').value,
+                    text: pageEntry.querySelector('.page-text').value
+                }))
             };
+        }
+
+        addPage({ title: 'Introducción', text: 'Texto de ejemplo.' });
+        document.getElementById('addPageBtn').addEventListener('click', () => addPage());
+
+        async function getAuthHeaders(method) {
+            const headers = { 'Content-Type': 'application/json' };
+            if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+                const csrfResponse = await fetch('/login', { cache: 'no-store' });
+                const loginHtml = await csrfResponse.text();
+                const csrfInput = new DOMParser()
+                    .parseFromString(loginHtml, 'text/html')
+                    .querySelector('input[name="_csrf"]');
+                if (!csrfResponse.ok || !csrfInput) {
+                    throw new Error('No se pudo obtener el token CSRF.');
+                }
+                headers['X-XSRF-TOKEN'] = csrfInput.value;
+            }
+            return headers;
         }
 
         async function apiRequest(url, method = 'GET', body = null) {
             const options = {
                 method,
-                headers: getAuthHeaders()
+                headers: await getAuthHeaders(method)
             };
 
             if (body !== null) {
@@ -207,33 +279,15 @@
             return data;
         }
 
-        document.getElementById('saveTokenBtn').addEventListener('click', () => {
-            const token = tokenInput.value.trim();
-            if (!token) {
-                setStatus('error', 'Debes introducir un token antes de guardarlo.');
-                return;
-            }
-            localStorage.setItem('bookToken', token);
-            setStatus('ok', 'Token guardado en el navegador.');
-        });
-
         document.getElementById('loginForm').addEventListener('submit', async (event) => {
             event.preventDefault();
             try {
-                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('username').value.trim();
                 const password = document.getElementById('password').value.trim();
 
-                const data = await apiRequest('/api/auth/login', 'POST', { username, password });
-                if (data.accessToken) {
-                    tokenInput.value = data.accessToken;
-                    localStorage.setItem('bookToken', data.accessToken);
-                    setStatus('ok', 'Login correcto. Token guardado.');
-                    renderResult(data);
-                    return;
-                }
-
-                setStatus('warn', 'La respuesta no devolvió un accessToken.');
-                renderResult(data);
+                await apiRequest('/api/auth/login', 'POST', { email, password });
+                setStatus('ok', 'Login correcto. La cookie JWT quedó activa en el navegador.');
+                renderResult({ authenticated: true });
             } catch (error) {
                 setStatus('error', 'Fallo al hacer login.');
                 renderResult(error.message);
@@ -259,6 +313,10 @@
             }
             try {
                 const data = await apiRequest(`/api/books/${id}`);
+                document.getElementById('title').value = data.title;
+                document.getElementById('author').value = data.author;
+                document.getElementById('isbn').value = data.isbn;
+                setPages(data.pages || []);
                 setStatus('ok', `Libro ${id} obtenido correctamente.`);
                 renderResult(data);
             } catch (error) {
@@ -268,12 +326,11 @@
         });
 
         document.getElementById('createBtn').addEventListener('click', async () => {
+            if (!validateBookForm()) {
+                return;
+            }
             try {
-                const payload = {
-                    title: document.getElementById('title').value,
-                    author: document.getElementById('author').value,
-                    isbn: document.getElementById('isbn').value
-                };
+                const payload = getBookPayload();
                 const data = await apiRequest('/api/books', 'POST', payload);
                 setStatus('ok', 'Libro creado correctamente.');
                 document.getElementById('bookId').value = data.id;
@@ -290,12 +347,11 @@
                 setStatus('warn', 'Introduce un ID para actualizar.');
                 return;
             }
+            if (!validateBookForm()) {
+                return;
+            }
             try {
-                const payload = {
-                    title: document.getElementById('title').value,
-                    author: document.getElementById('author').value,
-                    isbn: document.getElementById('isbn').value
-                };
+                const payload = getBookPayload();
                 const data = await apiRequest(`/api/books/${id}`, 'PUT', payload);
                 setStatus('ok', `Libro ${id} actualizado correctamente.`);
                 renderResult(data);

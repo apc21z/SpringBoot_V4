@@ -70,7 +70,7 @@ La aplicación no guarda una sesión HTTP tradicional; cada petición protegida 
 
 ## Roles y autorización
 
-Los roles no se incluyen como claims en el JWT de esta implementación: se cargan desde la cuenta al validar el token. El registro asigna `USER` por defecto. Las reglas de `SecurityConfig` permiten `/dashboard` a `USER` y `ADMIN`, y `/admin` solo a `ADMIN`. Para la API, `/api/auth/register` y `/api/auth/login` son públicas; las rutas restantes requieren autenticación, y las escrituras de personas requieren `ADMIN`.
+Los roles no se incluyen como claims en el JWT de esta implementación: se cargan desde la cuenta al validar el token. El registro asigna `USER` por defecto. Las reglas de `SecurityConfig` permiten `/dashboard` a `USER` y `ADMIN`, y `/admin` solo a `ADMIN`. Para la API, `/api/auth/register` y `/api/auth/login` son públicas; las rutas restantes requieren autenticación, y las operaciones de escritura de libros y personas requieren `ADMIN`.
 
 Autenticación responde «quién eres»; autorización responde «qué puedes hacer». Tener un JWT válido no da permiso automáticamente para todas las rutas.
 

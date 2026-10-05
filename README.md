@@ -11,7 +11,7 @@ La idea del proyecto es mantener la capa de presentación separada de la capa de
 ## Tecnologías
 
 - Java 21
-- Spring Boot 3.x
+- Spring Boot 4.1.1
 - Spring MVC + Thymeleaf
 - Spring Data JPA
 - Spring Security
@@ -73,13 +73,12 @@ Ejemplos clave:
 
 ### Rutas web típicas
 
-- `/`
-- `/login`
-- `/register`
-- `/dashboard`
-- `/admin`
+Las rutas web devuelven páginas HTML navegables; las rutas `/api/**` son endpoints JSON y no páginas:
+
+- `/`, `/login`, `/register`
+- `/dashboard`, `/admin`
 - `/people`
-- `/books`
+- `/books`, `/books/test`
 - `/thymeTest`
 
 Estas rutas devuelven templates sobre `src/main/resources/templates`, por ejemplo:
@@ -110,13 +109,19 @@ Su responsabilidad es exponer endpoints JSON para consumir desde frontend, Postm
 
 ### Endpoints principales
 
+#### Libros
+
 ```text
 GET    /api/books
 GET    /api/books/{id}
 POST   /api/books
 PUT    /api/books/{id}
 DELETE /api/books/{id}
+```
 
+#### Personas
+
+```text
 GET    /api/person
 GET    /api/person/{id}
 POST   /api/person
@@ -129,6 +134,23 @@ POST   /api/people
 PUT    /api/people/{id}
 DELETE /api/people/{id}
 ```
+
+#### Autenticación
+
+```text
+POST   /api/auth/register
+POST   /api/auth/login
+```
+
+Los endpoints REST requieren autenticación salvo registro y login. Las operaciones de escritura de libros y personas requieren el rol `ADMIN`. La autenticación usa una cookie JWT `HttpOnly`; las peticiones que modifican datos también deben incluir el token CSRF.
+
+### Validación de DTOs
+
+- Libros: `title`, `author` e `isbn` son obligatorios y admiten hasta 255 caracteres; `pages` es una lista obligatoria de objetos con título y texto. El ID de cada página lo genera la base de datos. No se impone un formato concreto al ISBN.
+- Personas: `firstName` y `lastName` son obligatorios y admiten hasta 255 caracteres; `profession` es opcional y admite hasta 255 caracteres.
+- Skills: `name` es obligatorio y admite hasta 255 caracteres. Las skills de una persona también se validan al validar `PersonDTO`.
+
+Los controladores activan estas reglas con `@Valid`. Para más información, consulta [la documentación del proyecto](docs/README.md) y la [colección Postman](postman/ProyectV4.postman_collection.json).
 
 ### Regla de diseño
 
@@ -287,10 +309,10 @@ docker compose up -d db
 ### Variables útiles
 
 ```bash
-export JWT_SECRET="$(openssl rand -hex 32)"
+export JWT_EXPIRATION_MS=900000
 ```
 
-La app usa la configuración de `application.properties` y los valores de `compose.yaml` para conectar a MySQL local.
+La app usa la configuración de `application.properties` y los valores de `compose.yaml` para conectar a MySQL local. Actualmente, `security.jwt.secret` contiene una clave local de desarrollo; exportar `JWT_SECRET` no la reemplaza. Configura un secreto externo antes de desplegar la aplicación.
 
 ## Estado actual
 

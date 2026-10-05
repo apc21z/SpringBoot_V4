@@ -1,24 +1,24 @@
 # JWT: implementación en este proyecto
 
-Este documento recorre las clases que implementan autenticación JWT en `src/main/java/com/apc21z/proyectv4/jwt/` y cómo se conectan con Spring Security, las cuentas y el frontend Thymeleaf.
+Este documento recorre las clases que implementan autenticación JWT en `src/main/java/com/apc21z/proyectv4/security/jwt/` y cómo se conectan con Spring Security, las cuentas y el frontend Thymeleaf.
 
 ## Estructura
 
 | Archivo | Función |
 | --- | --- |
-| `jwt/model/UserAccount.java` | Entidad de usuarios persistida en `users`. |
-| `repository/UserAccountRepository.java` | Consulta por correo y comprueba duplicados. |
-| `service/UserAccountService.java` | Registro, normalización de correo y carga de usuarios para Spring Security. |
-| `jwt/config/AuthenticatedUserDetails.java` | Adapta `UserAccount` a `UserDetails` y convierte el rol a autoridad Spring. |
-| `jwt/config/JwtProperties.java` | Vincula `security.jwt.*` a propiedades Java. |
-| `jwt/service/JwtService.java` | Firma, verifica, lee y empaqueta tokens en cookies. |
-| `jwt/config/JwtAuthenticationFilter.java` | Extrae y valida la cookie en cada petición. |
-| `jwt/config/SecurityConfig.java` | Define cadenas de seguridad, CSRF, login web y permisos. |
-| `jwt/controller/AuthController.java` | Endpoints JSON de login y registro para la API. |
-| `jwt/dto/LoginRequest.java`, `RegisterRequest.java` | Contratos JSON y validaciones de autenticación. |
-| `jwt/dto/AuthResponse.java` | Record declarado, pero actualmente no utilizado por los endpoints. |
+| `security/jwt/model/UserAccount.java` | Entidad de usuarios persistida en `users`. |
+| `rest/repository/UserAccountRepository.java` | Consulta por correo y comprueba duplicados. |
+| `rest/service/UserAccountService.java` | Registro, normalización de correo y carga de usuarios para Spring Security. |
+| `security/jwt/config/AuthenticatedUserDetails.java` | Adapta `UserAccount` a `UserDetails` y convierte el rol a autoridad Spring. |
+| `security/jwt/config/JwtProperties.java` | Vincula `security.jwt.*` a propiedades Java. |
+| `security/jwt/service/JwtService.java` | Firma, verifica, lee y empaqueta tokens en cookies. |
+| `security/jwt/config/JwtAuthenticationFilter.java` | Extrae y valida la cookie en cada petición. |
+| `security/jwt/config/SecurityConfig.java` | Define cadenas de seguridad, CSRF, login web y permisos. |
+| `security/jwt/controller/AuthController.java` | Endpoints JSON de login y registro para la API. |
+| `security/jwt/dto/LoginRequest.java`, `RegisterRequest.java` | Contratos JSON y validaciones de autenticación. |
+| `security/jwt/dto/AuthResponse.java` | Record declarado, pero actualmente no utilizado por los endpoints. |
 
-Las páginas web y el registro Thymeleaf están en `controller/IndexController.java`, `controller/LoginController.java` y `templates/login.html` / `templates/register.html`.
+Las páginas web y el registro Thymeleaf están en `web/IndexController.java`, `web/LoginController.java` y `resources/templates/login.html` / `resources/templates/register.html`.
 
 ## Cuenta y credenciales
 
@@ -83,7 +83,7 @@ El formulario de logout de `navbar.html` envía `POST /logout` con el token CSRF
 
 `SecurityConfig` define dos `SecurityFilterChain`:
 
-1. `apiSecurity`, con `@Order(1)` y matcher `/api/**`, mantiene la API sin sesión HTTP (`STATELESS`), instala autenticación JWT y aplica autorización por ruta. Login y registro API son públicos. GET y demás rutas requieren autenticación; POST, PUT y DELETE para personas requieren rol `ADMIN`. Los errores no autenticados de API responden `401`.
+1. `apiSecurity`, con `@Order(1)` y matcher `/api/**`, mantiene la API sin sesión HTTP (`STATELESS`), instala autenticación JWT y aplica autorización por ruta. Login y registro API son públicos. Las rutas de consulta requieren autenticación; POST, PUT y DELETE para libros y personas requieren rol `ADMIN`. Los errores no autenticados de API responden `401`.
 2. `webSecurity`, con `@Order(2)`, atiende el resto, usa el formulario de login y protege páginas según roles: dashboard acepta `USER` o `ADMIN`, y `/admin` exige `ADMIN`.
 
 Ambas cadenas usan `CookieCsrfTokenRepository`. Los templates insertan `${_csrf.parameterName}` y `${_csrf.token}` en los formularios. Esta protección es relevante porque el navegador adjunta cookies de forma automática también a peticiones que cambian datos.
@@ -102,8 +102,9 @@ Ambas cadenas usan `CookieCsrfTokenRepository`. Los templates insertan `${_csrf.
 El valor `security.jwt.expiration-ms` sí admite `JWT_EXPIRATION_MS` y por defecto configura 900000 ms (15 minutos). `JwtProperties` también declara ese valor por defecto.
 
 ### Documentación Bearer frente al código
+### Clientes que requieren Bearer
 
-El README principal describe el uso de `Authorization: Bearer <accessToken>` y una respuesta con `accessToken`. La implementación actual no coincide con esa descripción:
+La implementación actual no ofrece autenticación mediante `Authorization: Bearer <accessToken>`:
 
 - `AuthController` solo escribe la cookie y devuelve el cuerpo vacío.
 - `JwtAuthenticationFilter.extractToken` solo busca la cookie `JWT`; no lee `Authorization`.

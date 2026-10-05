@@ -1,10 +1,15 @@
 # Guías del proyecto
 
-Documentación práctica para el backend Spring Boot y su API REST.
+Documentación práctica de las páginas web, la API REST y la autenticación del proyecto.
+
+## Aplicación
+
+- [README principal](../README.md): arquitectura, rutas web, endpoints API, validaciones y ejecución local.
+- [Colección Postman](../postman/ProyectV4.postman_collection.json): autenticación JWT en cookie y peticiones protegidas.
 
 ## Endpoints
 
-- [Guía para añadir un endpoint REST](ENDPOINTS.md): entidad, DTO, repositorio, servicio, mapper, controlador, seguridad y pruebas.
+- [Guía y contrato de endpoints REST](ENDPOINTS.md): rutas, estructura actual de libros, DTOs, validaciones, seguridad y pruebas.
 
 ## Autenticación JWT
 

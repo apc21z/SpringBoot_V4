@@ -75,7 +75,7 @@
     <div class="container">
         <div class="card">
             <h1>Libros</h1>
-            <p class="muted">Listado de libros consultado desde la API REST.</p>
+            <p class="muted">Listado de libros y contenido de sus páginas consultado desde la API REST.</p>
 
             <div class="actions">
                 <button type="button" id="loadBooksBtn">Cargar libros</button>
@@ -92,13 +92,58 @@
         const listEl = document.getElementById('book-list');
         const token = localStorage.getItem('bookToken') || '';
 
+        function showMessage(message) {
+            const item = document.createElement('li');
+            item.textContent = message;
+            listEl.replaceChildren(item);
+        }
+
+        function appendMetadata(item, label, value) {
+            const row = document.createElement('p');
+            const labelElement = document.createElement('span');
+            labelElement.className = 'muted';
+            labelElement.textContent = `${label}: `;
+            const valueElement = document.createElement('span');
+            valueElement.textContent = value ?? '';
+            row.append(labelElement, valueElement);
+            item.append(row);
+        }
+
+        function renderBook(book) {
+            const item = document.createElement('li');
+            const title = document.createElement('strong');
+            title.textContent = book.title;
+            item.append(title);
+
+            appendMetadata(item, 'Autor', book.author);
+            appendMetadata(item, 'ISBN', book.isbn);
+
+            const pages = Array.isArray(book.pages) ? book.pages : [];
+            const details = document.createElement('details');
+            const summary = document.createElement('summary');
+            summary.textContent = `Páginas (${pages.length})`;
+            details.append(summary);
+
+            const pageList = document.createElement('ol');
+            pages.forEach(page => {
+                const pageItem = document.createElement('li');
+                const pageTitle = document.createElement('strong');
+                pageTitle.textContent = page.title;
+                const pageText = document.createElement('p');
+                pageText.textContent = page.text;
+                pageItem.append(pageTitle, pageText);
+                pageList.append(pageItem);
+            });
+            details.append(pageList);
+            item.append(details);
+            return item;
+        }
+
         async function loadBooks() {
-            listEl.innerHTML = '<li>Cargando libros...</li>';
+            showMessage('Cargando libros...');
             try {
                 const response = await fetch('/api/books', {
-                    headers: {
-                        'Authorization': token ? `Bearer ${token}` : ''
-                    }
+                    credentials: 'same-origin'
                 });
 
                 if (!response.ok) {
@@ -107,19 +152,13 @@
 
                 const books = await response.json();
                 if (!books.length) {
-                    listEl.innerHTML = '<li>No hay libros registrados.</li>';
+                    showMessage('No hay libros registrados.');
                     return;
                 }
 
-                listEl.innerHTML = books.map(book => `
-                    <li>
-                        <strong>${book.title}</strong><br>
-                        <span class="muted">Autor:</span> ${book.author}<br>
-                        <span class="muted">ISBN:</span> ${book.isbn}
-                    </li>
-                `).join('');
+                listEl.replaceChildren(...books.map(renderBook));
             } catch (error) {
-                listEl.innerHTML = `<li>${error.message}</li>`;
+                showMessage(error.message);
             }
         }
 

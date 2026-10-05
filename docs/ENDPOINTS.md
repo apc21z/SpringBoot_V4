@@ -14,25 +14,34 @@ El controlador recibe la petición y devuelve el estado HTTP adecuado. El servic
 
 | Componente | Ruta | Responsabilidad |
 | --- | --- | --- |
-| Entidad | `model/Book.java` | Representar la tabla y sus datos. |
-| DTO | `rest/dto/BookDTO.java` | Definir los datos de entrada y salida de la API. |
-| Repositorio | `repository/BookRepository.java` | Acceder a los datos mediante Spring Data JPA. |
-| Servicio | `service/BookService.java` | Coordinar operaciones, reglas y transacciones. |
-| Mapper | `rest/mapper/BookMapper.java` | Convertir entre entidad y DTO. |
+| Entidad | `rest/model/Book.java` | Representar la tabla y sus datos. |
+| DTO | `rest/model/dto/BookCreateDTO.java`, `BookResponseDTO.java` | Definir los datos de entrada y salida de la API. |
+| Repositorio | `rest/repository/BookRepository.java` | Acceder a los datos mediante Spring Data JPA. |
+| Servicio | `rest/service/BookService.java` | Coordinar operaciones, reglas y transacciones. |
+| Mapper | `rest/model/mapper/BookMapper.java` | Convertir entre entidad y DTO. |
 | Controlador | `rest/ApiBookController.java` | Exponer las rutas y gestionar HTTP. |
 
 ## 1. Crear la entidad
 
-Crea `model/Book.java`. `@Entity` registra la clase en JPA y `@GeneratedValue` deja que la base de datos genere el identificador.
+Crea `rest/model/Book.java`. `@Entity` registra la clase en JPA y `@GeneratedValue` deja que la base de datos genere el identificador.
 
 ```java
-package com.apc21z.proyectv4.model;
+package com.apc21z.proyectv4.rest.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderColumn;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -42,45 +51,114 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Book {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private String author;
+
+    @Column(nullable = false, unique = true)
+    private String isbn;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "book_id")
+    @OrderColumn(name = "page_order")
+    private List<BookPage> pages = new ArrayList<>();
 }
 ```
 
-En desarrollo, Hibernate actualiza el esquema según la configuración del proyecto. Para producción, revisa la estrategia de migración de base de datos antes de añadir o cambiar tablas.
+Cada página se persiste como `BookPage` en `book_pages`, con ID generado, título y texto. `@OrderColumn` conserva el orden de la lista. Si una base de datos conserva el antiguo campo numérico `pages`, `ddl-auto=update` no lo elimina ni convierte ese número en contenido: haz una copia de seguridad, migra lo que corresponda y elimina la columna antigua antes de crear libros nuevos.
+
+```java
+package com.apc21z.proyectv4.rest.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "book_pages")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class BookPage {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String title;
+
+    @Lob
+    @Column(nullable = false)
+    private String text;
+}
+```
 
 ## 2. Crear el DTO
 
-Crea `rest/dto/BookDTO.java`. El DTO separa el contrato JSON del esquema de la entidad. Las restricciones de Jakarta Validation se aplican al validar las peticiones.
+El proyecto separa el DTO de entrada del de respuesta. `@Valid` en el controlador activa las restricciones de Jakarta Validation.
 
 ```java
-package com.apc21z.proyectv4.rest.dto;
+package com.apc21z.proyectv4.rest.model.dto;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
-public record BookDTO(
-        Long id,
-        @NotBlank String title,
-        @NotBlank String author) {
+public record BookCreateDTO(
+    @NotBlank @Size(max = 255) String title,
+    @NotBlank @Size(max = 255) String author,
+    @NotBlank @Size(max = 255) String isbn,
+    @NotNull @Valid List<BookPageDTO> pages) {
 }
 ```
 
-El cliente omite `id` al crear un libro; la respuesta incluye el identificador generado.
+```java
+```java
+package com.apc21z.proyectv4.rest.model.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+public record BookPageDTO(
+        Long id,
+        @NotBlank @Size(max = 255) String title,
+        @NotBlank String text) {
+}
+```
+
+`BookResponseDTO` devuelve el `id` generado del libro y `pages` como una lista de `BookPageDTO`; cada página incluye su ID, título y texto. El ID se omite al crear páginas y lo asigna la base de datos. La lista es obligatoria y `@Valid` aplica las restricciones a cada página. Los títulos/textos no pueden quedar vacíos; los títulos admiten hasta 255 caracteres.
+
+Los DTO de personas aplican reglas similares: `PersonDTO` exige `firstName` y `lastName` (máximo 255 caracteres), deja `profession` opcional (máximo 255) y valida de forma anidada cada `SkillDTO`, cuyo `name` es obligatorio y admite hasta 255 caracteres.
 
 ## 3. Crear el repositorio
 
-Crea `repository/BookRepository.java`. Spring Data implementa las operaciones CRUD heredadas de `JpaRepository`.
+Crea `rest/repository/BookRepository.java`. Spring Data implementa las operaciones CRUD heredadas de `JpaRepository`.
 
 ```java
-package com.apc21z.proyectv4.repository;
+package com.apc21z.proyectv4.rest.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.apc21z.proyectv4.model.Book;
+import com.apc21z.proyectv4.rest.model.Book;
 
 public interface BookRepository extends JpaRepository<Book, Long> {
 }
@@ -88,19 +166,19 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
 Ya están disponibles métodos como `findAll`, `findById`, `save`, `existsById` y `deleteById`. Para búsquedas adicionales se pueden declarar métodos derivados, por ejemplo `findByAuthorIgnoreCase(String author)`.
 
-## 4. Crear el servicio
+## 4. Usar el servicio
 
-Crea `service/BookService.java`. Como en `PersonService`, el servicio mantiene la lógica fuera del controlador y define las transacciones.
+`rest/service/BookService.java` mantiene la lógica fuera del controlador y define las transacciones. Al actualizar, reemplaza la lista de páginas recibida; `orphanRemoval` elimina las páginas anteriores.
 
 ```java
-package com.apc21z.proyectv4.service;
+package com.apc21z.proyectv4.rest.service;
 
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.apc21z.proyectv4.model.Book;
-import com.apc21z.proyectv4.repository.BookRepository;
+import com.apc21z.proyectv4.rest.model.Book;
+import com.apc21z.proyectv4.rest.repository.BookRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -129,6 +207,9 @@ public class BookService {
         return repository.findById(id).map(existing -> {
             existing.setTitle(changes.getTitle());
             existing.setAuthor(changes.getAuthor());
+            existing.setIsbn(changes.getIsbn());
+            existing.getPages().clear();
+            existing.getPages().addAll(changes.getPages());
             return repository.save(existing);
         });
     }
@@ -146,32 +227,39 @@ public class BookService {
 
 ## 5. Crear el mapper MapStruct
 
-Crea `rest/mapper/BookMapper.java`. `@Mapper(componentModel = "spring")` hace que MapStruct genere una implementación registrada como bean de Spring. El procesador de MapStruct ya está configurado en el `pom.xml` del proyecto.
+Crea `rest/model/mapper/BookMapper.java`. `@Mapper(componentModel = "spring")` hace que MapStruct genere una implementación registrada como bean de Spring. El procesador de MapStruct ya está configurado en el `pom.xml` del proyecto.
 
 ```java
-package com.apc21z.proyectv4.rest.mapper;
+package com.apc21z.proyectv4.rest.model.mapper;
 
 import java.util.List;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import com.apc21z.proyectv4.model.Book;
-import com.apc21z.proyectv4.rest.dto.BookDTO;
+import com.apc21z.proyectv4.rest.model.Book;
+import com.apc21z.proyectv4.rest.model.BookPage;
+import com.apc21z.proyectv4.rest.model.dto.BookCreateDTO;
+import com.apc21z.proyectv4.rest.model.dto.BookPageDTO;
+import com.apc21z.proyectv4.rest.model.dto.BookResponseDTO;
 
 @Mapper(componentModel = "spring")
 public interface BookMapper {
-    BookDTO toDto(Book book);
-    List<BookDTO> toDto(List<Book> books);
+    BookResponseDTO toDto(Book book);
+    List<BookResponseDTO> toDto(List<Book> books);
+    BookPageDTO toDto(BookPage page);
 
     @Mapping(target = "id", ignore = true)
-    Book toEntity(BookDTO dto);
+    Book toEntity(BookCreateDTO dto);
+
+    @Mapping(target = "id", ignore = true)
+    BookPage toEntity(BookPageDTO dto);
 }
 ```
 
-Se ignora el `id` al crear la entidad para que el cliente no elija la clave primaria que se persiste.
+Se ignoran los IDs al crear el libro y sus páginas para que el cliente no elija las claves primarias. MapStruct usa los métodos de `BookPageDTO` para convertir automáticamente la lista anidada.
 
 ## 6. Crear el controlador REST
 
-Crea `rest/ApiBookController.java`. `@Valid` activa las validaciones del DTO. La API usa `201 Created` al crear, `404 Not Found` cuando no existe el recurso y `204 No Content` al borrar correctamente.
+Crea `rest/ApiBookController.java`. `@Valid` activa las validaciones del DTO de entrada. La API usa `201 Created` al crear, `404 Not Found` cuando no existe el recurso y `204 No Content` al borrar correctamente.
 
 ```java
 package com.apc21z.proyectv4.rest;
@@ -188,10 +276,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
-import com.apc21z.proyectv4.model.Book;
-import com.apc21z.proyectv4.rest.dto.BookDTO;
-import com.apc21z.proyectv4.rest.mapper.BookMapper;
-import com.apc21z.proyectv4.service.BookService;
+import com.apc21z.proyectv4.rest.model.Book;
+import com.apc21z.proyectv4.rest.model.dto.BookCreateDTO;
+import com.apc21z.proyectv4.rest.model.dto.BookResponseDTO;
+import com.apc21z.proyectv4.rest.model.mapper.BookMapper;
+import com.apc21z.proyectv4.rest.service.BookService;
 
 @RestController
 @RequestMapping("/api/books")
@@ -205,26 +294,26 @@ public class ApiBookController {
     }
 
     @GetMapping
-    public List<BookDTO> getBooks() {
+    public List<BookResponseDTO> getBooks() {
         return mapper.toDto(service.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BookDTO> getBook(@PathVariable Long id) {
+    public ResponseEntity<BookResponseDTO> getBook(@PathVariable Long id) {
         return service.findById(id).map(mapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    public ResponseEntity<BookDTO> createBook(@Valid @RequestBody BookDTO dto) {
+    public ResponseEntity<BookResponseDTO> createBook(@Valid @RequestBody BookCreateDTO dto) {
         Book saved = service.save(mapper.toEntity(dto));
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.toDto(saved));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<BookDTO> updateBook(
-            @PathVariable Long id, @Valid @RequestBody BookDTO dto) {
+    public ResponseEntity<BookResponseDTO> updateBook(
+            @PathVariable Long id, @Valid @RequestBody BookCreateDTO dto) {
         return service.update(id, mapper.toEntity(dto)).map(mapper::toDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -252,31 +341,32 @@ public class ApiBookController {
 
 ## 7. Configurar la seguridad
 
-Las rutas `/api/**` usan JWT en `jwt/config/SecurityConfig.java`. En la configuración actual, las operaciones de escritura de personas requieren rol `ADMIN`; las demás rutas API requieren autenticación. Para aplicar la misma política a libros, añade estas reglas a `apiSecurity`, antes de `.anyRequest().authenticated()`:
+Las rutas `/api/**` usan cookie JWT y CSRF, configurados en `security/jwt/config/SecurityConfig.java`. En la configuración actual, el login y el registro son públicos; las demás rutas requieren autenticación. Las operaciones de escritura de libros y personas requieren rol `ADMIN`.
 
-```java
-.requestMatchers(HttpMethod.POST, "/api/books").hasRole("ADMIN")
-.requestMatchers(HttpMethod.PUT, "/api/books/**").hasRole("ADMIN")
-.requestMatchers(HttpMethod.DELETE, "/api/books/**").hasRole("ADMIN")
-```
-
-Así, cualquier usuario autenticado puede consultar libros y solo `ADMIN` puede crear, actualizar o borrar. Ajusta las reglas si el requisito de acceso del nuevo recurso es diferente. No olvides declarar explícitamente con `permitAll()` las rutas que deban ser públicas.
+Si añades otro recurso, declara sus reglas de autorización en `apiSecurity` antes de `.anyRequest().authenticated()`. Los clientes HTTP deben conservar la cookie JWT y enviar el token CSRF en las peticiones que modifican datos; la aplicación no acepta actualmente `Authorization: Bearer`.
 
 ## 8. Compilar y probar
 
-1. Inicia MySQL y configura/ejecuta la aplicación según el [README principal](../README.md). Para arrancar, define `JWT_SECRET` tal como se describe allí.
+1. Inicia MySQL y configura/ejecuta la aplicación según el [README principal](../README.md). El puerto configurado por defecto es `8080`.
 2. Ejecuta `./mvnw test`.
-3. Registra o autentica un usuario con `POST /api/auth/register` o `POST /api/auth/login` y utiliza el token devuelto como `Authorization: Bearer <token>`.
+3. En Postman, importa [`ProyectV4.postman_collection.json`](../postman/ProyectV4.postman_collection.json) y ejecuta primero `01 - Obtener CSRF`; la colección conserva las cookies y añade el encabezado CSRF.
 4. Comprueba cada operación: listado, identificador existente e inexistente, creación, actualización y borrado.
-5. Comprueba validaciones (por ejemplo, título vacío) y permisos: un usuario sin rol ADMIN no debe poder escribir si se aplicaron las reglas anteriores.
+5. Comprueba validaciones (por ejemplo, título vacío o de más de 255 caracteres) y permisos: un usuario sin rol `ADMIN` no puede escribir libros o personas.
 
-Ejemplo de creación:
+El cuerpo JSON para crear un libro incluye sus datos y una lista de páginas. Cada página enviada necesita título y texto; el ID se genera en el servidor:
 
-```bash
-curl -X POST http://localhost:8081/api/books \
-  -H "Authorization: Bearer $ACCESS_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"title":"Clean Code","author":"Robert C. Martin"}'
+```json
+{
+    "title": "Clean Code",
+    "author": "Robert C. Martin",
+    "isbn": "9780132350884",
+    "pages": [
+        {
+            "title": "Introducción",
+            "text": "Texto de ejemplo."
+        }
+    ]
+}
 ```
 
 ## Lista de comprobación

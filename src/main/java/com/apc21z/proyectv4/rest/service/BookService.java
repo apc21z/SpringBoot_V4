@@ -38,6 +38,8 @@ public class BookService {
             existingBook.setTitle(changes.getTitle());
             existingBook.setAuthor(changes.getAuthor());
             existingBook.setIsbn(changes.getIsbn());
+            existingBook.getPages().clear();
+            existingBook.getPages().addAll(changes.getPages());
             return bookRepository.save(existingBook);
         });
     }

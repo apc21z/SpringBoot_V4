@@ -35,36 +35,36 @@
         </div>
       </section>
 
-      <section id="routes" aria-labelledby="routes-title">
+      <section id="routes" aria-labelledby="web-routes-title">
         <div class="section-heading">
-          <h2 id="routes-title">Rutas disponibles</h2>
-          <p>Vistas web y endpoint de datos</p>
+          <h2 id="web-routes-title">Páginas web</h2>
+          <p>Enlaces navegables de la aplicación</p>
         </div>
         <div class="route-list">
           <article class="route-item">
             <span class="route-method">GET</span>
+            <a class="route-path" href="/">/</a>
+            <p class="route-description">Página de inicio de ProyectV4.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">GET</span>
             <a class="route-path" href="/login">/login</a>
-            <p class="route-description">Formulario de acceso para usuarios autenticados.</p>
+            <p class="route-description">Formulario de acceso.</p>
           </article>
           <article class="route-item">
             <span class="route-method">GET</span>
             <a class="route-path" href="/register">/register</a>
-            <p class="route-description">Formulario de registro de nuevos usuarios.</p>
+            <p class="route-description">Formulario de registro de usuarios.</p>
           </article>
           <article class="route-item">
             <span class="route-method">GET</span>
             <a class="route-path" href="/dashboard">/dashboard</a>
-            <p class="route-description">Zona privada para usuarios logueados y administradores.</p>
+            <p class="route-description">Zona privada para usuarios autenticados.</p>
           </article>
           <article class="route-item">
             <span class="route-method">GET</span>
             <a class="route-path" href="/admin">/admin</a>
-            <p class="route-description">Panel exclusivo para administradores.</p>
-          </article>
-          <article class="route-item">
-            <span class="route-method">GET</span>
-            <a class="route-path" href="/">/</a>
-            <p class="route-description">Página de inicio de ProyectV4.</p>
+            <p class="route-description">Panel para administradores.</p>
           </article>
           <article class="route-item">
             <span class="route-method">GET</span>
@@ -78,8 +78,45 @@
           </article>
           <article class="route-item">
             <span class="route-method">GET</span>
-            <a class="route-path" href="/api/people">/api/people</a>
-            <p class="route-description">Endpoint REST que devuelve personas en formato JSON.</p>
+            <a class="route-path" href="/books">/books</a>
+            <p class="route-description">Listado de libros.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">GET</span>
+            <a class="route-path" href="/books/test">/books/test</a>
+            <p class="route-description">Probador de la API de libros.</p>
+          </article>
+        </div>
+
+        <div class="section-heading">
+          <h2 id="api-routes-title">API REST</h2>
+          <p>Información de endpoints; no son páginas navegables</p>
+        </div>
+        <div class="route-list" aria-labelledby="api-routes-title">
+          <article class="route-item">
+            <span class="route-method">API</span>
+            <span class="route-path">/api/books</span>
+            <p class="route-description">GET lista y POST crea libros; cada libro incluye páginas como objetos con ID, título y texto.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">API</span>
+            <span class="route-path">/api/books/{id}</span>
+            <p class="route-description">GET consulta, PUT actualiza y DELETE elimina un libro y su lista de páginas.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">API</span>
+            <span class="route-path">/api/people · /api/person</span>
+            <p class="route-description">GET lista; POST crea; GET/PUT/DELETE por ID.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">API</span>
+            <span class="route-path">/api/auth/register</span>
+            <p class="route-description">POST registra un usuario.</p>
+          </article>
+          <article class="route-item">
+            <span class="route-method">API</span>
+            <span class="route-path">/api/auth/login</span>
+            <p class="route-description">POST inicia sesión y devuelve el token.</p>
           </article>
         </div>
       </section>
