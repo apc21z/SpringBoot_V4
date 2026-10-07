@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.apc21z.proyectv4.rest.service.UserAccountService;
 import com.apc21z.proyectv4.security.jwt.dto.LoginRequest;
 import com.apc21z.proyectv4.security.jwt.dto.RegisterRequest;
+import com.apc21z.proyectv4.security.jwt.dto.UserAccountDTO;
 import com.apc21z.proyectv4.security.jwt.service.JwtService;
 
 import jakarta.validation.Valid;
@@ -36,11 +37,12 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Void> register(@Valid @RequestBody RegisterRequest request, HttpServletRequest servletRequest) {
-        UserDetails user = userAccountService.register(request.email(), request.password());
+    public ResponseEntity<UserAccountDTO> register(@Valid @RequestBody RegisterRequest request,
+            HttpServletRequest servletRequest) {
+        UserAccountDTO user = userAccountService.register(request.email(), request.password());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .header(HttpHeaders.SET_COOKIE, jwtService.createTokenCookie(user.getUsername(), servletRequest.isSecure()).toString())
-                .build();
+                .header(HttpHeaders.SET_COOKIE, jwtService.createTokenCookie(user.email(), servletRequest.isSecure()).toString())
+                .body(user);
     }
 
     @PostMapping("/login")

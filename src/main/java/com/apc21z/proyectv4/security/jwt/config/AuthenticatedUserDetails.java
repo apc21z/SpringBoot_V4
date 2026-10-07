@@ -1,7 +1,6 @@
 package com.apc21z.proyectv4.security.jwt.config;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -14,16 +13,15 @@ public final class AuthenticatedUserDetails implements UserDetails {
     private final Long id;
     private final String email;
     private final String password;
-    private final String role;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public AuthenticatedUserDetails(UserAccount account) {
         this.id = account.getId();
         this.email = account.getEmail();
         this.password = account.getPassword();
-        this.role = account.getRole();
-        String authority = role.startsWith("ROLE_") ? role : "ROLE_" + role;
-        this.authorities = List.of(new SimpleGrantedAuthority(authority));
+        this.authorities = account.getRoles().stream()
+            .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+            .toList();
     }
 
     public Long getId() {
@@ -32,10 +30,6 @@ public final class AuthenticatedUserDetails implements UserDetails {
 
     public String getEmail() {
         return email;
-    }
-
-    public String getRole() {
-        return role;
     }
 
     @Override

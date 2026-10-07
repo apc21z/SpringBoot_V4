@@ -13,6 +13,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.apc21z.proyectv4.rest.repository.UserAccountRepository;
 import com.apc21z.proyectv4.security.jwt.config.AuthenticatedUserDetails;
+import com.apc21z.proyectv4.security.jwt.dto.RegisterRequest;
+import com.apc21z.proyectv4.security.jwt.dto.UserAccountDTO;
+import com.apc21z.proyectv4.security.jwt.mapper.UserAccountMapper;
 import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 @Service
@@ -20,20 +23,24 @@ public class UserAccountService implements UserDetailsService {
 
     private final UserAccountRepository userAccountRepository;
     private final PasswordEncoder passwordEncoder;
+    private final UserAccountMapper userAccountMapper;
 
-    public UserAccountService(UserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder) {
+    public UserAccountService(UserAccountRepository userAccountRepository, PasswordEncoder passwordEncoder,
+            UserAccountMapper userAccountMapper) {
         this.userAccountRepository = userAccountRepository;
         this.passwordEncoder = passwordEncoder;
+        this.userAccountMapper = userAccountMapper;
     }
 
-    public UserDetails register(String email, String rawPassword) {
+    public UserAccountDTO register(String email, String rawPassword) {
         String normalizedEmail = normalizeEmail(email);
         if (userAccountRepository.existsByEmail(normalizedEmail)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
         }
 
-        UserAccount account = new UserAccount(normalizedEmail, passwordEncoder.encode(rawPassword));
-        return toUserDetails(userAccountRepository.save(account));
+        RegisterRequest request = new RegisterRequest(normalizedEmail, rawPassword);
+        UserAccount account = userAccountMapper.toEntity(request, passwordEncoder.encode(rawPassword));
+        return userAccountMapper.toDto(userAccountRepository.save(account));
     }
 
     @Override

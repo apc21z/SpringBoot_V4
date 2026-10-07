@@ -1,5 +1,7 @@
 package com.apc21z.proyectv4;
 
+import java.util.List;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,7 +27,7 @@ public class ProyectV4Application {
 			String email = "admin@admin.com";
 			if (userAccountRepository.findByEmail(email).isEmpty()) {
 				UserAccount admin = new UserAccount(email, passwordEncoder.encode("admin123"));
-				admin.setRole("ADMIN");
+				admin.setRoles(List.of("ADMIN"));
 				userAccountRepository.save(admin);
 			}
 		};
