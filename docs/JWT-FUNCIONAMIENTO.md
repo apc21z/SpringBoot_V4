@@ -43,7 +43,7 @@ El registro web es diferente: el formulario de `/register` crea la cuenta y redi
 
 La API ofrece `POST /api/auth/register` y `POST /api/auth/login`. Ambos reciben JSON. El registro valida correo y contraseña (entre 8 y 72 caracteres); el login valida credenciales. Al completarse, el servidor devuelve `Set-Cookie: JWT=...`; el navegador guarda la cookie y la envía automáticamente a las siguientes rutas `/api/**`.
 
-En el código actual, estas respuestas tienen el cuerpo vacío. Por tanto, el frontend no obtiene `accessToken` en JSON ni tiene que construir manualmente una cabecera `Authorization: Bearer ...`. Los cambios de estado están protegidos además con CSRF.
+El registro responde `201 Created` con un `UserAccountDTO` que contiene `id`, `email` y `roles`. El login responde `200 OK` sin cuerpo. Ninguna respuesta incluye la contraseña ni un token en JSON: la autenticación se mantiene en la cookie, no en una cabecera `Authorization: Bearer ...`. Los cambios de estado están protegidos además con CSRF.
 
 Ejemplo de petición de login:
 
@@ -55,6 +55,16 @@ Content-Type: application/json
 ```
 
 La respuesta satisfactoria incluye una cabecera `Set-Cookie` con `JWT`, `HttpOnly`, `SameSite=Lax`, `Path=/` y duración según la expiración configurada. El atributo `Secure` se activa cuando la solicitud llega al servidor como HTTPS.
+
+El cuerpo de registro tiene esta forma:
+
+```json
+{
+        "id": 42,
+        "email": "ana@example.com",
+        "roles": ["USER"]
+}
+```
 
 ## Validación en cada petición
 
@@ -70,7 +80,7 @@ La aplicación no guarda una sesión HTTP tradicional; cada petición protegida 
 
 ## Roles y autorización
 
-Los roles no se incluyen como claims en el JWT de esta implementación: se cargan desde la cuenta al validar el token. El registro asigna `USER` por defecto. Las reglas de `SecurityConfig` permiten `/dashboard` a `USER` y `ADMIN`, y `/admin` solo a `ADMIN`. Para la API, `/api/auth/register` y `/api/auth/login` son públicas; las rutas restantes requieren autenticación, y las operaciones de escritura de libros y personas requieren `ADMIN`.
+Los roles no se incluyen como claims en el JWT de esta implementación: se cargan desde la cuenta al validar el token. Una cuenta puede tener varios roles; el registro asigna `USER` por defecto. Las reglas de `SecurityConfig` permiten `/dashboard` a `USER` y `ADMIN`, y `/admin` solo a `ADMIN`. Para la API, `/api/auth/register` y `/api/auth/login` son públicas; las rutas restantes requieren autenticación, y las operaciones de escritura de libros y personas requieren `ADMIN`.
 
 Autenticación responde «quién eres»; autorización responde «qué puedes hacer». Tener un JWT válido no da permiso automáticamente para todas las rutas.
 
@@ -91,8 +101,8 @@ El token caduca según `security.jwt.expiration-ms`; el valor por defecto de `Jw
 | Ver formulario web | `GET /login` | Público. |
 | Login web | `POST /login` | Cookie JWT y redirección a `/dashboard`. |
 | Registro web | `POST /register` | Crea la cuenta y redirige a `/login`. |
-| Login de API | `POST /api/auth/login` | Cookie JWT; cuerpo vacío. |
-| Registro de API | `POST /api/auth/register` | Crea cuenta y establece cookie JWT; `201`. |
+| Login de API | `POST /api/auth/login` | Cookie JWT; `200` con cuerpo vacío. |
+| Registro de API | `POST /api/auth/register` | Crea cuenta, establece cookie JWT y devuelve `UserAccountDTO`; `201`. |
 | Página privada | `GET /dashboard` | `USER` o `ADMIN`. |
 | Administración | `GET /admin` | Solo `ADMIN`. |
 | Salir de web | `POST /logout` | Elimina cookie y redirige. |

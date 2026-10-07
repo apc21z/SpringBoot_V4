@@ -6,25 +6,29 @@ Este documento recorre las clases que implementan autenticación JWT en `src/mai
 
 | Archivo | Función |
 | --- | --- |
-| `security/jwt/model/UserAccount.java` | Entidad de usuarios persistida en `users`. |
+| `security/jwt/model/UserAccount.java` | Entidad de usuarios persistida en `users`; mantiene varios roles en una colección eager. |
 | `rest/repository/UserAccountRepository.java` | Consulta por correo y comprueba duplicados. |
-| `rest/service/UserAccountService.java` | Registro, normalización de correo y carga de usuarios para Spring Security. |
-| `security/jwt/config/AuthenticatedUserDetails.java` | Adapta `UserAccount` a `UserDetails` y convierte el rol a autoridad Spring. |
+| `rest/service/UserAccountService.java` | Registro, normalización de correo, mapeo y carga de usuarios para Spring Security. |
+| `security/jwt/config/AuthenticatedUserDetails.java` | Adapta `UserAccount` a `UserDetails` y convierte cada rol a una autoridad Spring. |
 | `security/jwt/config/JwtProperties.java` | Vincula `security.jwt.*` a propiedades Java. |
 | `security/jwt/service/JwtService.java` | Firma, verifica, lee y empaqueta tokens en cookies. |
 | `security/jwt/config/JwtAuthenticationFilter.java` | Extrae y valida la cookie en cada petición. |
 | `security/jwt/config/SecurityConfig.java` | Define cadenas de seguridad, CSRF, login web y permisos. |
 | `security/jwt/controller/AuthController.java` | Endpoints JSON de login y registro para la API. |
-| `security/jwt/dto/LoginRequest.java`, `RegisterRequest.java` | Contratos JSON y validaciones de autenticación. |
+| `security/jwt/mapper/UserAccountMapper.java` | Convierte `RegisterRequest` en entidad y entidad en DTO de respuesta con MapStruct. |
+| `security/jwt/dto/LoginRequest.java`, `RegisterRequest.java` | Contratos de entrada JSON y validaciones de autenticación. |
+| `security/jwt/dto/UserAccountDTO.java` | Respuesta segura con id, correo y roles; no contiene contraseña. |
 | `security/jwt/dto/AuthResponse.java` | Record declarado, pero actualmente no utilizado por los endpoints. |
 
 Las páginas web y el registro Thymeleaf están en `web/IndexController.java`, `web/LoginController.java` y `resources/templates/login.html` / `resources/templates/register.html`.
 
 ## Cuenta y credenciales
 
-`UserAccount` persiste correo único, contraseña codificada y rol. El rol inicial es `USER`. `UserAccountService.register` recorta y pasa el correo a minúsculas, rechaza correos duplicados y codifica la contraseña mediante el `PasswordEncoder` proporcionado por Spring Security (`BCryptPasswordEncoder`). La base de datos nunca recibe la contraseña en texto claro.
+`UserAccount` persiste correo único y contraseña codificada en `users`. Los roles son una colección `List<String>` con `@ElementCollection(fetch = FetchType.EAGER)`, almacenada en `user_roles` (columna `user_id` más `role`) y cargada junto con la cuenta. El rol inicial es `USER`; la cuenta semilla de administración recibe `ADMIN`.
 
-El mismo servicio implementa `UserDetailsService`. Para autenticar o validar un JWT, busca el correo normalizado en el repositorio y convierte la cuenta en `AuthenticatedUserDetails`. Esa clase expone la contraseña codificada y la autoridad `ROLE_USER` o `ROLE_ADMIN` para Spring Security.
+`UserAccountService.register` recorta y pasa el correo a minúsculas, rechaza correos duplicados y codifica la contraseña mediante el `PasswordEncoder` proporcionado por Spring Security (`BCryptPasswordEncoder`). `UserAccountMapper` recibe el `RegisterRequest` y la contraseña ya codificada para crear la entidad; no mapea la contraseña sin cifrar. Tras guardar, convierte la cuenta a `UserAccountDTO`, que solo expone `id`, `email` y `roles`. La base de datos nunca recibe la contraseña en texto claro.
+
+El mismo servicio implementa `UserDetailsService`. Para autenticar o validar un JWT, busca el correo normalizado en el repositorio y convierte la cuenta en `AuthenticatedUserDetails`. Esa clase expone la contraseña codificada y todas las autoridades de la cuenta; a cada rol le antepone `ROLE_` si aún no lo tiene.
 
 ## Creación del token
 
@@ -57,10 +61,10 @@ La firma garantiza que el contenido no se haya cambiado y que lo haya emitido al
 
 `AuthController` publica rutas bajo `/api/auth`:
 
-- `POST /api/auth/register`: valida `RegisterRequest`, crea cuenta y devuelve `201` con `Set-Cookie`.
-- `POST /api/auth/login`: valida `LoginRequest`, invoca `AuthenticationManager` y devuelve `200` con `Set-Cookie`.
+- `POST /api/auth/register`: valida `RegisterRequest`, crea cuenta y devuelve `201` con `Set-Cookie` y un `UserAccountDTO` en el cuerpo.
+- `POST /api/auth/login`: valida `LoginRequest`, invoca `AuthenticationManager` y devuelve `200` con `Set-Cookie`; el cuerpo queda vacío.
 
-Ambos retornan `ResponseEntity<Void>`: sus cuerpos están vacíos. El navegador almacena la cookie y la envía en futuras peticiones. `AuthResponse` existe en el código, pero no se usa aquí.
+El navegador almacena la cookie y la envía en futuras peticiones. El registro no expone contraseña ni token en su DTO. `AuthResponse` existe en el código, pero no se usa aquí.
 
 Ejemplo del cuerpo JSON de registro:
 
@@ -72,6 +76,16 @@ Ejemplo del cuerpo JSON de registro:
 ```
 
 El endpoint de API puede usarse desde una aplicación web o herramienta HTTP; sin embargo, para conservar la cookie se debe mantener un cookie jar y cumplir la protección CSRF configurada. Un cliente que quiera autenticación por `Authorization: Bearer` necesitaría soporte explícito en el filtro, que hoy no existe.
+
+Respuesta de registro:
+
+```json
+{
+  "id": 42,
+  "email": "ana@example.com",
+  "roles": ["USER"]
+}
+```
 
 ### Páginas web
 
@@ -99,6 +113,19 @@ Ambas cadenas usan `CookieCsrfTokenRepository`. Los templates insertan `${_csrf.
 - usa una clave aleatoria de al menos 32 bytes y no la subas al repositorio;
 - activa HTTPS para que las cookies lleven `Secure`.
 
+En `application.properties`, las comillas simples escritas alrededor del valor son caracteres literales; cuentan como parte del secreto y de su longitud UTF-8. Al sustituir el valor, configura una clave que por sí sola tenga al menos 32 bytes.
+
+### Migración de la columna de rol
+
+Al pasar desde el esquema anterior, que guardaba un solo rol en `users.role`, `spring.jpa.hibernate.ddl-auto=update` puede crear `user_roles`, pero no copia los valores existentes. Después de que Hibernate cree la tabla, migra los roles una sola vez:
+
+```sql
+INSERT INTO user_roles (user_id, role)
+SELECT id, role FROM users WHERE role IS NOT NULL;
+```
+
+No ejecutes esta migración más de una vez: añadiría roles duplicados.
+
 El valor `security.jwt.expiration-ms` sí admite `JWT_EXPIRATION_MS` y por defecto configura 900000 ms (15 minutos). `JwtProperties` también declara ese valor por defecto.
 
 ### Documentación Bearer frente al código
@@ -106,7 +133,7 @@ El valor `security.jwt.expiration-ms` sí admite `JWT_EXPIRATION_MS` y por defec
 
 La implementación actual no ofrece autenticación mediante `Authorization: Bearer <accessToken>`:
 
-- `AuthController` solo escribe la cookie y devuelve el cuerpo vacío.
+- `AuthController` escribe la cookie; el registro además devuelve `UserAccountDTO`, pero el login no incluye token ni cuerpo.
 - `JwtAuthenticationFilter.extractToken` solo busca la cookie `JWT`; no lee `Authorization`.
 - `AuthResponse` y los métodos auxiliares de expiración no están conectados a la respuesta.
 
