@@ -1,0 +1,46 @@
+.account-page {
+    margin: 0;
+    background: radial-gradient(ellipse at 15% 10%, #f9dfea 0, transparent 34%), radial-gradient(ellipse at 90% 80%, #d9f2f5 0, transparent 36%), #fff8fc;
+    color: #30263a;
+    font-family: "Segoe UI", sans-serif;
+}
+
+.account-page .wrap { margin: 60px auto; }
+.admin-page .wrap { width: min(900px, calc(100% - 28px)); }
+.dashboard-page .wrap { width: min(980px, calc(100% - 28px)); }
+
+.account-page .card {
+    background: #fffdfd;
+    border: 1px solid #eadce9;
+    border-radius: 8px;
+    padding: 28px;
+    box-shadow: 0 12px 30px rgba(120, 100, 181, 0.1);
+}
+
+.admin-page .badge, .dashboard-page .chip {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.admin-page .badge { margin-bottom: 12px; background: #f9e2ed; color: #98405e; }
+.dashboard-page .chip { background: #f5f9d9; color: #475f22; }
+.admin-page h1 { margin: 0 0 12px; font-size: clamp(2rem, 4vw, 2.7rem); }
+.dashboard-page h1 { margin: 0; font-size: clamp(2rem, 4vw, 3rem); }
+.account-page p { color: #766a7a; line-height: 1.7; }
+.admin-page .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 20px; }
+.dashboard-page .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+.dashboard-page .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.dashboard-page .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin: 26px 0; }
+.dashboard-page .panel { padding: 20px; border: 1px solid #eadce9; border-radius: 6px; background: #f4f0fa; }
+.dashboard-page .panel h3 { margin: 0 0 10px; }
+.dashboard-page .panel p { margin: 0; line-height: 1.6; }
+
+.account-page .btn { display: inline-block; padding: 10px 16px; border-radius: 10px; font-weight: 700; text-decoration: none; }
+.account-page .btn.primary { background: #237f82; color: #fff; }
+.account-page .btn.secondary { background: #f3effa; color: #58458d; }
+.account-page .logout { color: #237f82; text-decoration: none; font-weight: 700; }
+.logout-form { margin: 0; }
+.logout-button { display: inline-flex; align-items: center; gap: 7px; border: 0; padding: 0; background: none; color: #237f82; font: inherit; font-weight: 700; cursor: pointer; }

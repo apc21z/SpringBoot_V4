@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest.exception;
+package com.apc21z.proyectv4.web;
 
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;

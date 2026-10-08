@@ -551,9 +551,17 @@ h1 span { color: var(--green); }
 }
 
 .form-status.error { border-color: var(--coral); }
-.people-page .person-row { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); padding-block: 14px; }
-.person-identity .person-name { margin-bottom: 4px; }
+.people-table-wrap { overflow-x: auto; border-block: 1px solid var(--line); }
+.people-table { width: 100%; min-width: 560px; border-collapse: collapse; text-align: left; }
+.people-table th, .people-table td { padding: 13px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.people-table th { color: var(--muted); font-size: 12px; font-weight: 650; }
+.people-table tbody tr:last-child td { border-bottom: 0; }
 .person-skills { display: flex; flex-wrap: wrap; gap: 7px; }
+.people-pagination { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.page-link { display: inline-flex; align-items: center; gap: 6px; color: var(--green); font-size: 12px; font-weight: 650; text-decoration: none; }
+.page-link svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.page-link.disabled { color: var(--muted); opacity: 0.5; }
+.page-summary { color: var(--muted); font-size: 12px; text-align: center; }
 .path-variable-example {
   display: flex;
   align-items: center;
@@ -694,7 +702,8 @@ footer {
   .filter-controls input { flex-basis: 100%; }
   .people-form { grid-template-columns: 1fr; }
   .people-form button { align-self: start; }
-  .people-page .person-row { grid-template-columns: 1fr; gap: 10px; }
+  .people-pagination { flex-wrap: wrap; }
+  .page-summary { flex: 1 1 100%; order: -1; }
 }
 
 @media (max-width: 390px) {

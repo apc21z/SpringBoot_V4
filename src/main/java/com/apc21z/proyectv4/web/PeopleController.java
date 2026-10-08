@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Locale;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,6 +26,8 @@ import com.apc21z.proyectv4.rest.service.PersonService;
 @RequestMapping("/people")
 public class PeopleController {
 
+    private static final int PEOPLE_PAGE_SIZE = 5;
+
     private final PersonService personService;
 
     public PeopleController(PersonService personService) {
@@ -31,8 +36,9 @@ public class PeopleController {
 
     @GetMapping
     public String getPeoplePage(@RequestParam(required = false, defaultValue = "") String skill,
-            @RequestParam(required = false) String status, Model model) {
-        addPeopleToModel(model, skill);
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page, Model model) {
+        addPeopleToModel(model, skill, page);
         model.addAttribute("status", status);
         model.addAttribute("personForm", new CreatePersonForm("", "", "", ""));
         return "people";
@@ -64,22 +70,34 @@ public class PeopleController {
     }
 
     private String showInvalidForm(Model model) {
-        addPeopleToModel(model, "");
+        addPeopleToModel(model, "", 0);
         model.addAttribute("status", "invalid");
         model.addAttribute("skillFilter", "");
         return "people";
     }
 
-    private void addPeopleToModel(Model model, String skill) {
+    private void addPeopleToModel(Model model, String skill, int requestedPage) {
         String filter = skill.trim();
         String normalizedFilter = filter.toLowerCase(Locale.ROOT);
-        List<Person> people = personService.findAll().stream()
-                .filter(person -> normalizedFilter.isEmpty()
-                        || person.getSkills() != null && person.getSkills().stream()
-                                .anyMatch(personSkill -> personSkill.getName() != null
-                                        && personSkill.getName().toLowerCase(Locale.ROOT).contains(normalizedFilter)))
-                .toList();
-        model.addAttribute("people", people);
+        PageRequest pageRequest = PageRequest.of(Math.max(0, requestedPage), PEOPLE_PAGE_SIZE,
+            Sort.by(Sort.Direction.ASC, "id"));
+        Page<Person> peoplePage = personService.findPageBySkill(
+            normalizedFilter.isEmpty() ? null : normalizedFilter, pageRequest);
+        if (peoplePage.getTotalPages() > 0 && pageRequest.getPageNumber() >= peoplePage.getTotalPages()) {
+            pageRequest = PageRequest.of(peoplePage.getTotalPages() - 1, PEOPLE_PAGE_SIZE,
+                Sort.by(Sort.Direction.ASC, "id"));
+            peoplePage = personService.findPageBySkill(normalizedFilter.isEmpty() ? null : normalizedFilter,
+                pageRequest);
+        }
+
+        model.addAttribute("people", peoplePage.getContent());
+        model.addAttribute("peopleTotal", peoplePage.getTotalElements());
+        model.addAttribute("currentPage", peoplePage.getNumber());
+        model.addAttribute("totalPages", peoplePage.getTotalPages());
+        model.addAttribute("firstPerson", peoplePage.isEmpty() ? 0
+            : peoplePage.getNumber() * peoplePage.getSize() + 1);
+        model.addAttribute("lastPerson", peoplePage.getNumber() * peoplePage.getSize()
+            + peoplePage.getNumberOfElements());
         model.addAttribute("skillFilter", filter);
     }
 }

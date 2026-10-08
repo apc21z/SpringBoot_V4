@@ -62,7 +62,7 @@
       <section aria-labelledby="people-list-title">
         <div class="section-heading">
           <h2 id="people-list-title">Directorio</h2>
-          <p><span th:text="${#lists.size(people)}">0</span> resultados</p>
+          <p><span th:text="${peopleTotal}">0</span> resultados</p>
         </div>
         <form class="filter-form" action="/people" method="get">
           <label for="skill-filter">Buscar por skill</label>
@@ -74,17 +74,50 @@
           </div>
         </form>
         <p class="empty-state" th:if="${#lists.isEmpty(people)}">No hay personas que coincidan con esta búsqueda.</p>
-        <div class="people-list" th:unless="${#lists.isEmpty(people)}">
-          <article class="person-row" th:each="person : ${people}">
-            <div class="person-identity">
-              <h3 class="person-name" th:text="${person.firstName + ' ' + person.lastName}">Nombre Apellido</h3>
-              <p class="person-profession" th:text="${person.profession}">Profesión</p>
-            </div>
-            <div class="person-skills" aria-label="Skills">
-              <span class="skill-item" th:each="personSkill : ${person.skills}" th:text="${personSkill.name}">Java</span>
-            </div>
-          </article>
+        <div class="people-table-wrap" th:unless="${#lists.isEmpty(people)}">
+          <table class="people-table">
+            <thead>
+              <tr>
+                <th scope="col">Persona</th>
+                <th scope="col">Profesión</th>
+                <th scope="col">Skills</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="person : ${people}">
+                <td th:text="${person.firstName + ' ' + person.lastName}">Nombre Apellido</td>
+                <td th:text="${person.profession}">Profesión</td>
+                <td>
+                  <div class="person-skills" aria-label="Skills">
+                    <span class="skill-item" th:each="personSkill : ${person.skills}" th:text="${personSkill.name}">Java</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+        <nav class="people-pagination" aria-label="Paginación de personas" th:if="${peopleTotal > 0}">
+          <a class="page-link" th:if="${currentPage > 0}"
+             th:href="@{/people(skill=${skillFilter}, page=${currentPage - 1})}" rel="prev">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Anterior
+          </a>
+          <span class="page-link disabled" th:unless="${currentPage > 0}">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Anterior
+          </span>
+          <span class="page-summary" aria-live="polite" th:text="|${people.size()} / ${peopleTotal} elementos|">
+            5 / 5 elementos
+          </span>
+          <span class="page-summary" th:text="|Página ${currentPage + 1} / ${totalPages}|">
+            Página 1 / 1
+          </span>
+          <a class="page-link" th:if="${currentPage + 1 < totalPages}"
+             th:href="@{/people(skill=${skillFilter}, page=${currentPage + 1})}" rel="next">
+            Siguiente<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+          <span class="page-link disabled" th:unless="${currentPage + 1 < totalPages}">
+            Siguiente<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg>
+          </span>
+        </nav>
       </section>
     </main>
 

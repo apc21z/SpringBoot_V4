@@ -7,6 +7,7 @@
   <meta name="description" content="Panel de inicio de ProyectV4, aplicación web con Java y Spring Boot.">
   <title>ProyectV4 | Inicio</title>
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/home.css">
 </head>
 <body class="home-page">
   <div class="shell">
@@ -24,7 +25,7 @@
             <span>Base de datos MySQL</span>
             <strong th:text="${databaseConnected} ? 'Conectada' : 'Sin conexión'">Comprobando</strong>
           </div>
-          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:18px;">
+          <div class="home-actions">
             <a class="primary-link" href="/login"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>Iniciar sesión</a>
             <a class="primary-link secondary-action" href="/register"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Registrarse</a>
           </div>

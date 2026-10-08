@@ -4,170 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Libros</title>
-    <style>
-        :root {
-            --bg: #fff8fc;
-            --card: #fffdfd;
-            --primary: #237f82;
-            --text: #30263a;
-            --muted: #766a7a;
-            --border: #eadce9;
-            --success: #537832;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            background-image: radial-gradient(#e9699112 0.8px, transparent 0.8px), radial-gradient(#83cde012 0.8px, transparent 0.8px);
-            background-size: 8px 8px;
-        }
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-        .card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
-        }
-        h1 { margin-top: 0; }
-        .actions {
-            display: flex;
-            gap: 12px;
-            margin: 24px 0;
-            flex-wrap: wrap;
-        }
-        a, button {
-            text-decoration: none;
-            border: none;
-            border-radius: 4px;
-            padding: 12px 18px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        a {
-            background: #edf3ff;
-            color: var(--primary);
-        }
-        button {
-            background: var(--primary);
-            color: white;
-        }
-        button svg, .actions a svg { width: 16px; height: 16px; flex: 0 0 auto; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; fill: none; }
-        button, .actions a { display: inline-flex; align-items: center; gap: 8px; }
-        #book-list {
-            list-style: none;
-            padding-left: 0;
-            display: grid;
-            gap: 12px;
-        }
-        #book-list li {
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 14px 16px;
-            background: #f5f1fa;
-        }
-        .muted { color: var(--muted); }
-    </style>
+    <link rel="stylesheet" href="/css/books.css">
 </head>
 <body>
     <div class="container">
         <div class="card">
             <h1><svg aria-hidden="true" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#7864b5" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14M3 18V5a2 2 0 0 1 2-2h4a3 3 0 0 1 3 3 3 3 0 0 1 3-3h4a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2h-4a3 3 0 0 0-3 2 3 3 0 0 0-3-2H5a2 2 0 0 1-2-2z"/></svg>Libros</h1>
-            <p class="muted">Listado de libros y contenido de sus páginas consultado desde la API REST.</p>
+            <p class="muted">Listado paginado de libros y contenido de sus páginas.</p>
 
             <div class="actions">
-                <button type="button" id="loadBooksBtn"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.6-2L20 12M4 12l2.8 5a7 7 0 0 0 11.6-2"/></svg>Cargar libros</button>
                 <a href="/books/test"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m8 8-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></svg>Abrir probador API</a>
             </div>
 
-            <ul id="book-list">
-                <li>Cargando libros...</li>
-            </ul>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Título</th>
+                            <th scope="col">Autor</th>
+                            <th scope="col">ISBN</th>
+                            <th scope="col">Páginas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="book : ${bookPage.content}">
+                            <td th:text="${book.title}">Título</td>
+                            <td th:text="${book.author}">Autor</td>
+                            <td th:text="${book.isbn}">ISBN</td>
+                            <td>
+                                <details>
+                                    <summary th:text="|Páginas (${#lists.size(book.pages)})|">Páginas (0)</summary>
+                                    <ol>
+                                        <li th:each="bookPageContent : ${book.pages}">
+                                            <strong th:text="${bookPageContent.title}">Título de página</strong>
+                                            <p th:text="${bookPageContent.text}">Contenido</p>
+                                        </li>
+                                    </ol>
+                                </details>
+                            </td>
+                        </tr>
+                        <tr th:if="${bookPage.empty}"><td colspan="4">No hay libros registrados.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <nav class="pagination" aria-label="Paginación de libros" th:if="${bookPage.totalElements > 0}">
+                <a th:if="${bookPage.hasPrevious()}" th:href="@{/books(page=${bookPage.number - 1})}" rel="prev"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Anterior</a>
+                <span class="disabled" aria-disabled="true" th:unless="${bookPage.hasPrevious()}"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>Anterior</span>
+                <span class="muted" aria-live="polite" th:text="|${bookPage.numberOfElements} / ${bookPage.totalElements} elementos|">5 / 5 elementos</span>
+                <span class="muted" th:text="|Página ${bookPage.number + 1} / ${bookPage.totalPages}|">Página 1 / 1</span>
+                <a th:if="${bookPage.hasNext()}" th:href="@{/books(page=${bookPage.number + 1})}" rel="next">Siguiente<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></a>
+                <span class="disabled" aria-disabled="true" th:unless="${bookPage.hasNext()}">Siguiente<svg aria-hidden="true" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></svg></span>
+            </nav>
         </div>
     </div>
 
-    <script>
-        const listEl = document.getElementById('book-list');
-        const token = localStorage.getItem('bookToken') || '';
-
-        function showMessage(message) {
-            const item = document.createElement('li');
-            item.textContent = message;
-            listEl.replaceChildren(item);
-        }
-
-        function appendMetadata(item, label, value) {
-            const row = document.createElement('p');
-            const labelElement = document.createElement('span');
-            labelElement.className = 'muted';
-            labelElement.textContent = `${label}: `;
-            const valueElement = document.createElement('span');
-            valueElement.textContent = value ?? '';
-            row.append(labelElement, valueElement);
-            item.append(row);
-        }
-
-        function renderBook(book) {
-            const item = document.createElement('li');
-            const title = document.createElement('strong');
-            title.textContent = book.title;
-            item.append(title);
-
-            appendMetadata(item, 'Autor', book.author);
-            appendMetadata(item, 'ISBN', book.isbn);
-
-            const pages = Array.isArray(book.pages) ? book.pages : [];
-            const details = document.createElement('details');
-            const summary = document.createElement('summary');
-            summary.textContent = `Páginas (${pages.length})`;
-            details.append(summary);
-
-            const pageList = document.createElement('ol');
-            pages.forEach(page => {
-                const pageItem = document.createElement('li');
-                const pageTitle = document.createElement('strong');
-                pageTitle.textContent = page.title;
-                const pageText = document.createElement('p');
-                pageText.textContent = page.text;
-                pageItem.append(pageTitle, pageText);
-                pageList.append(pageItem);
-            });
-            details.append(pageList);
-            item.append(details);
-            return item;
-        }
-
-        async function loadBooks() {
-            showMessage('Cargando libros...');
-            try {
-                const response = await fetch('/api/books', {
-                    credentials: 'same-origin'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Error ${response.status}: ${response.statusText}`);
-                }
-
-                const books = await response.json();
-                if (!books.length) {
-                    showMessage('No hay libros registrados.');
-                    return;
-                }
-
-                listEl.replaceChildren(...books.map(renderBook));
-            } catch (error) {
-                showMessage(error.message);
-            }
-        }
-
-        document.getElementById('loadBooksBtn').addEventListener('click', loadBooks);
-        loadBooks();
-    </script>
 </body>
 </html>

@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,10 @@ public class PersonService {
 
     public List<Person> findAll() {
         return personRepository.findAll();
+    }
+
+    public Page<Person> findPageBySkill(String skill, Pageable pageable) {
+        return personRepository.findPageBySkill(skill, pageable);
     }
 
     public Optional<Person> findById(Long id) {
