@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest;
+package com.apc21z.proyectv4.rest.controller;
 
 import java.util.List;
 
@@ -20,13 +20,13 @@ import com.apc21z.proyectv4.rest.model.mapper.PersonMapper;
 import com.apc21z.proyectv4.rest.service.PersonService;
 
 @RestController
-@RequestMapping("/api/person")
-public class ApiPersonController {
+@RequestMapping("/api/people")
+public class ApiPeopleController {
 
     private final PersonService personService;
     private final PersonMapper personMapper;
 
-    public ApiPersonController(PersonService personService, PersonMapper personMapper) {
+    public ApiPeopleController(PersonService personService, PersonMapper personMapper) {
         this.personService = personService;
         this.personMapper = personMapper;
     }

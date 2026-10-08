@@ -1,4 +1,4 @@
-package com.apc21z.proyectv4.rest;
+package com.apc21z.proyectv4.rest.controller;
 
 import java.util.List;
 
