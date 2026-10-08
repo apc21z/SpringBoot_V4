@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.apc21z.proyectv4.rest.model.Person;
 import com.apc21z.proyectv4.rest.model.Skill;
 import com.apc21z.proyectv4.rest.repository.PersonRepository;
+import com.apc21z.proyectv4.rest.service.UserAccountService;
 
 @SpringBootTest(properties = "security.jwt.secret=test-secret-for-v4-integration-tests-only-123456")
 @AutoConfigureMockMvc(addFilters = false)
@@ -30,6 +31,9 @@ class ProyectV4ApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	@Autowired
+	private UserAccountService userAccountService;
 
 	@Test
 	void contextLoads() {
@@ -67,6 +71,15 @@ class ProyectV4ApplicationTests {
 		mockMvc.perform(get("/people").param("page", "0"))
 				.andExpect(status().isOk())
 				.andExpect(content().string(org.hamcrest.Matchers.containsString("Directorio")));
+	}
+
+	@Test
+	@Transactional
+	void registrationAssignsDefaultUserRole() {
+		String email = "registration-" + java.util.UUID.randomUUID() + "@example.test";
+		var account = userAccountService.register(email, "TestPassword123!");
+
+		assertEquals(List.of("USER"), account.roles());
 	}
 
 }

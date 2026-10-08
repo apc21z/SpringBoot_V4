@@ -126,6 +126,8 @@ SELECT id, role FROM users WHERE role IS NOT NULL;
 
 No ejecutes esta migración más de una vez: añadiría roles duplicados.
 
+Después de migrar y verificar los roles, `users.role` es una columna heredada que el modelo actual ya no usa; `ddl-auto=update` no la elimina automáticamente. Si vas a conservar los usuarios existentes, haz copia de seguridad, migra los roles y elimina esa columna de forma controlada. Si vas a borrar toda la base de datos, no ejecutes el `INSERT`: al iniciar la aplicación, Hibernate crea el esquema nuevo (`users` y `user_roles`) desde las entidades. La URL JDBC crea también la base `proyectv4` si no existe, siempre que el usuario MySQL tenga permisos para crearla.
+
 El valor `security.jwt.expiration-ms` sí admite `JWT_EXPIRATION_MS` y por defecto configura 900000 ms (15 minutos). `JwtProperties` también declara ese valor por defecto.
 
 ### Documentación Bearer frente al código
