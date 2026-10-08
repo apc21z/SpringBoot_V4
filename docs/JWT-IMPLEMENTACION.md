@@ -24,7 +24,7 @@ Las páginas web y el registro Thymeleaf están en `web/IndexController.java`, `
 
 ## Cuenta y credenciales
 
-`UserAccount` persiste correo único y contraseña codificada en `users`. Los roles son una colección `List<String>` con `@ElementCollection(fetch = FetchType.EAGER)`, almacenada en `user_roles` (columna `user_id` más `role`) y cargada junto con la cuenta. El rol inicial es `USER`; la cuenta semilla de administración recibe `ADMIN`.
+`UserAccount` persiste correo único y contraseña codificada en `users`. Los roles son una colección `List<Role>` con `@ElementCollection(fetch = FetchType.EAGER)` y `@Enumerated(EnumType.STRING)`, almacenada en `user_roles` (columna `user_id` más `role`) y cargada junto con la cuenta. El rol inicial es `USER`; la cuenta semilla de administración recibe `ADMIN`. El DTO de cuenta sigue exponiendo los nombres de roles como `List<String>`.
 
 `UserAccountService.register` recorta y pasa el correo a minúsculas, rechaza correos duplicados y codifica la contraseña mediante el `PasswordEncoder` proporcionado por Spring Security (`BCryptPasswordEncoder`). `UserAccountMapper` recibe el `RegisterRequest` y la contraseña ya codificada para crear la entidad; no mapea la contraseña sin cifrar. Tras guardar, convierte la cuenta a `UserAccountDTO`, que solo expone `id`, `email` y `roles`. La base de datos nunca recibe la contraseña en texto claro.
 

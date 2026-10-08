@@ -1,15 +1,18 @@
 package com.apc21z.proyectv4.web;
 
+import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.apc21z.proyectv4.rest.service.PersonService;
 import com.apc21z.proyectv4.rest.service.UserAccountService;
+import com.apc21z.proyectv4.security.jwt.dto.RegisterRequest;
 
 import org.springframework.web.server.ResponseStatusException;
 
@@ -31,21 +34,25 @@ public class IndexController {
     }
 
     @GetMapping("/register")
-    public String registerPage() {
+    public String registerPage(Model model) {
+        model.addAttribute("registerForm", new RegisterRequest("", ""));
         return "register";
     }
 
     @PostMapping("/register")
-    public String register(@RequestParam String email,
-            @RequestParam String password,
-            RedirectAttributes redirectAttributes) {
+    public String register(@Valid @ModelAttribute("registerForm") RegisterRequest request,
+            BindingResult bindingResult, Model model, RedirectAttributes redirectAttributes) {
+        if (bindingResult.hasErrors()) {
+            return "register";
+        }
+
         try {
-            userAccountService.register(email, password);
+            userAccountService.register(request.email(), request.password());
             redirectAttributes.addFlashAttribute("successMessage", "Cuenta creada correctamente. Ya puedes iniciar sesión.");
             return "redirect:/login";
         } catch (ResponseStatusException ex) {
-            redirectAttributes.addFlashAttribute("errorMessage", ex.getReason());
-            return "redirect:/register";
+            model.addAttribute("errorMessage", ex.getReason());
+            return "register";
         }
     }
 

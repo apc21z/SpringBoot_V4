@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.apc21z.proyectv4.rest.repository.UserAccountRepository;
 import com.apc21z.proyectv4.security.jwt.config.JwtProperties;
+import com.apc21z.proyectv4.security.jwt.model.Role;
 import com.apc21z.proyectv4.security.jwt.model.UserAccount;
 
 @SpringBootApplication
@@ -27,7 +28,7 @@ public class ProyectV4Application {
 			String email = "admin@admin.com";
 			if (userAccountRepository.findByEmail(email).isEmpty()) {
 				UserAccount admin = new UserAccount(email, passwordEncoder.encode("admin123"));
-				admin.setRoles(List.of("ADMIN"));
+				admin.setRoles(List.of(Role.ADMIN));
 				userAccountRepository.save(admin);
 			}
 		};

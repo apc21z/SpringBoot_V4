@@ -20,7 +20,7 @@ public final class AuthenticatedUserDetails implements UserDetails {
         this.email = account.getEmail();
         this.password = account.getPassword();
         this.authorities = account.getRoles().stream()
-            .map(role -> new SimpleGrantedAuthority(role.startsWith("ROLE_") ? role : "ROLE_" + role))
+            .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
             .toList();
     }
 

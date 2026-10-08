@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,7 +39,8 @@ public class UserAccount {
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "role", nullable = false)
-    private List<String> roles = new ArrayList<>(List.of("USER"));
+    @Enumerated(EnumType.STRING)
+    private List<Role> roles = new ArrayList<>(List.of(Role.USER));
 
     public UserAccount(String email, String password) {
         this.email = email;
